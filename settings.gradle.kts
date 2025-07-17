@@ -21,7 +21,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "SayeongApp"
 include(":app")
-include(":data")
-include(":presentation")
-include(":kotlin")
-include(":domain")
+include(":core:data")
+include(":core:domain")
+include(":feature:Home")
+include(":build-logic:convention")
