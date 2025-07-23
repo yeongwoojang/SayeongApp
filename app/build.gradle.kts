@@ -1,10 +1,7 @@
 plugins {
     alias(libs.plugins.sayeong.android.application)
-//    alias(libs.plugins.android.application)
-//    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.hilt.android.gradle.plugin)
-    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.sayeong.android.hilt)
 }
 
 android {
@@ -66,8 +63,4 @@ dependencies {
     implementation(libs.retrofit.converter.gson)
     implementation(libs.google.code.gson)
     implementation(libs.okhttp.logging.interceptor)
-
-    //_ hilt
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)  // implementation에서 kapt로 변경
 }

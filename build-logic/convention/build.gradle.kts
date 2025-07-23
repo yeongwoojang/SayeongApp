@@ -44,6 +44,10 @@ gradlePlugin {
             id = libs.plugins.sayeong.android.library.get().pluginId
             implementationClass = "AndroidLibraryConventionPlugin"
         }
+        register("androidHilt") {
+            id = libs.plugins.sayeong.android.hilt.get().pluginId
+            implementationClass = "HiltConventionPlugin"
+        }
     }
 }
 
