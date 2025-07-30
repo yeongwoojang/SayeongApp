@@ -4,7 +4,7 @@ plugins {
     `kotlin-dsl`
 }
 
-group = "kr.co.fastcampus.sayeongapp.buildlogic"
+group = "com.sayeong.vv.sayeongapp.buildlogic"
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17

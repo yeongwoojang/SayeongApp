@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.network"
+    namespace = "com.sayeong.vv.network"
     compileSdk = 36
 
     defaultConfig {
@@ -47,4 +47,6 @@ dependencies {
     implementation(libs.retrofit.converter.gson)
     implementation(libs.google.code.gson)
     implementation(libs.okhttp.logging.interceptor)
+
+
 }

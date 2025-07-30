@@ -1,10 +1,11 @@
 plugins {
     alias(libs.plugins.sayeong.android.library)
     alias(libs.plugins.sayeong.android.hilt)
+    alias(libs.plugins.sayeong.android.compose)
 }
 
 android {
-    namespace = "com.example.player"
+    namespace = "com.sayeong.vv.player"
     compileSdk = 36
 
     defaultConfig {
@@ -24,8 +25,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
         jvmTarget = "11"
@@ -41,10 +42,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    //_ exoPlayer
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.ui)
     implementation(libs.media3.ui.compose)
-    implementation(libs.media3.exoplayer.hls)
     implementation(libs.media3.exoplayer.dash)
+    implementation(libs.media3.exoplayer.hls)
 }

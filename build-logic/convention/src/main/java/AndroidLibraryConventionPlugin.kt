@@ -1,7 +1,7 @@
 import com.android.build.gradle.LibraryExtension
-import kr.co.fastcampus.convention.configureKotlinAndroid
-import kr.co.fastcampus.convention.configureKotlinCoroutines
-import kr.co.fastcampus.convention.libs
+import com.sayeong.vv.convention.configureKotlinAndroid
+import com.sayeong.vv.convention.configureKotlinCoroutines
+import com.sayeong.vv.convention.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure

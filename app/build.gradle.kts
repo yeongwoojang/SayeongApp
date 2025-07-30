@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "kr.co.fastcampus.sayeongapp"
+    namespace = "com.sayeong.vv.sayeongapp"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "kr.co.fastcampus.sayeongapp"
+        applicationId = "com.sayeong.vv.sayeongapp"
         minSdk = 28
         targetSdk = 36
         versionCode = 1
@@ -39,6 +39,10 @@ android {
 }
 
 dependencies {
+    //_ feature 모듈 의존성 추가
+    implementation(projects.feature.home)
+    implementation(projects.feature.player)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     testImplementation(libs.junit)

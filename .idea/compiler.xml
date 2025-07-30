@@ -3,6 +3,7 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="11">
       <module name="SayeongApp.data" target="21" />
+      <module name="SayeongApp.feature.Home" target="21" />
       <module name="SayeongApp.Home" target="21" />
       <module name="SayeongApp.presentation" target="21" />
     </bytecodeTargetLevel>

@@ -30,6 +30,6 @@ rootProject.name = "SayeongApp"
 include(":app")
 include(":core:data")
 include(":core:domain")
-include(":feature:Home")
-include(":core:network")
+include(":feature:home")
 include(":feature:player")
+include(":core:network")

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "kr.co.fastcampus.data"
+    namespace = "com.sayeong.vv.data"
     compileSdk = 36
 
     defaultConfig {
