@@ -48,6 +48,10 @@ gradlePlugin {
             id = libs.plugins.sayeong.android.hilt.get().pluginId
             implementationClass = "HiltConventionPlugin"
         }
+        register("androidCompose") {
+            id = libs.plugins.sayeong.android.compose.get().pluginId
+            implementationClass = "AndroidComposeConventionPlugin"
+        }
     }
 }
 

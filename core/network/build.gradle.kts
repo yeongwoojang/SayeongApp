@@ -1,22 +1,17 @@
 plugins {
-    alias(libs.plugins.sayeong.android.application)
-    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.sayeong.android.library)
     alias(libs.plugins.sayeong.android.hilt)
-    alias(libs.plugins.sayeong.android.compose)
 }
 
 android {
-    namespace = "kr.co.fastcampus.sayeongapp"
+    namespace = "com.example.network"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "kr.co.fastcampus.sayeongapp"
         minSdk = 28
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -28,10 +23,9 @@ android {
             )
         }
     }
-
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
         jvmTarget = "11"
@@ -39,11 +33,18 @@ android {
 }
 
 dependencies {
+
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.test.manifest)
+
+    //_ network
+    implementation(libs.okhttp.core)
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.google.code.gson)
+    implementation(libs.okhttp.logging.interceptor)
 }
