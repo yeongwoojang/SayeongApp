@@ -12,7 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.sayeong.vv.home.HomeScreen
-import com.sayeong.vv.sayeongapp.ui.theme.SayeongAppTheme
+import com.sayeong.vv.designsystem.theme.SayeongAppTheme
+import com.sayeong.vv.sayeongapp.ui.SayeongApp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,9 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SayeongAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    HomeScreen()
-                }
+                SayeongApp()
             }
         }
     }
@@ -39,7 +38,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    SayeongAppTheme {
+    com.sayeong.vv.designsystem.theme.SayeongAppTheme {
         Greeting("Android")
     }
 }

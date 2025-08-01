@@ -1,4 +1,4 @@
-package com.sayeong.vv.sayeongapp.ui.theme
+package com.sayeong.vv.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
