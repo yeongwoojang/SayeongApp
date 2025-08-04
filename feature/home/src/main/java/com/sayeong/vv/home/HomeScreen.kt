@@ -7,3 +7,13 @@ import androidx.compose.runtime.Composable
 fun HomeScreen() {
     Text("Home")
 }
+
+@Composable
+fun SecondScreen() {
+    Text("Second")
+}
+
+@Composable
+fun ThirdScreen() {
+    Text("Third")
+}
