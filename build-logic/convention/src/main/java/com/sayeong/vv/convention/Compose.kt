@@ -18,6 +18,7 @@ internal fun Project.configureCompose(
             val bom = libs.findLibrary("androidx.compose.bom").get()
 
             "implementation"(libs.findLibrary("androidx.activity.compose").get())
+            "implementation"(libs.findLibrary("androidx.hilt.navigation.compose").get())
             "implementation"(platform(bom))
             "androidTestImplementation"(platform(bom))
             "implementation"(libs.findLibrary("androidx.ui").get())

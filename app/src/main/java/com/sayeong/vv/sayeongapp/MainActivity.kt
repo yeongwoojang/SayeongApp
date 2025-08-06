@@ -15,7 +15,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.sayeong.vv.home.HomeScreen
 import com.sayeong.vv.designsystem.theme.SayeongAppTheme
 import com.sayeong.vv.sayeongapp.ui.SayeongApp
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.HiltAndroidApp
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val lightScrim = android.graphics.Color.argb(0xe6, 0xFF, 0xFF, 0xFF)
 

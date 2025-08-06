@@ -7,10 +7,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -19,31 +22,17 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 
 @Composable
-fun PlayerScreen() {
-    val context = LocalContext.current
+fun PlayerScreen(
+    viewModel: PlayerViewModel = hiltViewModel()
+) {
 
-    // 1. ExoPlayer 인스턴스를 Composable의 생명주기에 맞춰 안전하게 생성하고 기억합니다.
-    val exoPlayer = remember {
-        ExoPlayer.Builder(context).build().apply {
-            // 3. 재생할 미디어 아이템을 설정하고 준비합니다.
-            val mediaItem = MediaItem.fromUri("https://storage.googleapis.com/exoplayer-test-media-0/play.mp3")
-            setMediaItem(mediaItem)
-            prepare()
-        }
-    }
+    val uiState by viewModel.uiState.collectAsState()
 
-    // 2. Composable이 화면에서 사라질 때(onDispose) ExoPlayer 리소스를 안전하게 해제합니다.
-    DisposableEffect(Unit) {
-        onDispose {
-            exoPlayer.release()
-        }
-    }
-
-    // 4. 앱(화면)의 생명주기(ON_PAUSE 등)에 따라 플레이어를 제어합니다.
-    PlayerLifecycleObserver(player = exoPlayer)
 
     // 5. UI 레이아웃
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
         // 기존의 Android View인 PlayerView를 Jetpack Compose에서 사용하기 위해 AndroidView를 사용합니다.
         AndroidView(
             modifier = Modifier
@@ -52,7 +41,7 @@ fun PlayerScreen() {
             factory = {
                 // 이 블록은 Composable이 처음 생성될 때 한 번만 호출됩니다.
                 PlayerView(it).apply {
-                    player = exoPlayer
+                    player = viewModel.player
                     useController = true // 기본 컨트롤러 UI(재생/정지 버튼, 탐색 바 등)를 사용합니다.
                 }
             }
