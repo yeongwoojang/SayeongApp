@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.sayeong.vv.home.HomeScreen
 import com.sayeong.vv.home.SecondScreen
 import com.sayeong.vv.home.ThirdScreen
+import com.sayeong.vv.player.PlayerScreen
 
 @Composable
 fun SayeongNavHost(
@@ -26,7 +27,7 @@ fun SayeongNavHost(
         }
 
         composable(SayeongDestination.SECOND.route) {
-            SecondScreen()
+            PlayerScreen()
         }
 
         composable(SayeongDestination.Third.route) {
