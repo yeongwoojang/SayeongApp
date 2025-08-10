@@ -1,25 +1,26 @@
 package com.sayeong.vv.player
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.media3.common.MediaItem
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import timber.log.Timber
 
 @Composable
 fun PlayerScreen(
@@ -28,7 +29,22 @@ fun PlayerScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            Timber.i("PlayerLifecycleObserver:: event: $event")
+            if (event == Lifecycle.Event.ON_PAUSE) {
+                viewModel.onPause()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
 
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+//    PlayerLifecycleObserver(viewModel.player)
     // 5. UI 레이아웃
     Column(
         modifier = Modifier.fillMaxSize()
@@ -46,44 +62,17 @@ fun PlayerScreen(
                 }
             }
         )
+        Spacer(modifier = Modifier.height(32.dp))
 
-        Text("ExoPlayer가 여기에 표시됩니다!")
-    }
-}
-
-/**
- * 플레이어의 생명주기를 관찰하고, 화면이 보이지 않을 때(ON_PAUSE) 재생을 멈추는 역할을 합니다.
- * @param player 제어할 ExoPlayer 인스턴스
- */
-@Composable
-private fun PlayerLifecycleObserver(player: ExoPlayer) {
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_PAUSE) {
-                player.pause()
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
+        // '무음 건너뛰기' 토글 버튼
+        Button(onClick = { viewModel.toggleSilenceSkipping() }) {
+            Text(
+                text = if (uiState.isSilenceSkippingEnabled) {
+                    "무음 건너뛰기 ON"
+                } else {
+                    "무음 건너뛰기 OFF"
+                }
+            )
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
