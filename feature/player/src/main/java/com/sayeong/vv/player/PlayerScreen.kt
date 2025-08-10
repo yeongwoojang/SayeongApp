@@ -1,5 +1,7 @@
 package com.sayeong.vv.player
 
+import android.view.LayoutInflater
+import android.widget.ImageButton
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -56,23 +58,35 @@ fun PlayerScreen(
                 .aspectRatio(16 / 9f), // 오디오이므로 화면 비율은 중요하지 않지만, 컨트롤러 공간 확보를 위해 설정
             factory = {
                 // 이 블록은 Composable이 처음 생성될 때 한 번만 호출됩니다.
-                PlayerView(it).apply {
+                val playerView = PlayerView(it).apply {
                     player = viewModel.player
                     useController = true // 기본 컨트롤러 UI(재생/정지 버튼, 탐색 바 등)를 사용합니다.
                 }
+
+                // 2. 우리가 만든 커스텀 버튼 레이아웃을 가져와서(inflate) PlayerView에 추가합니다.
+                // PlayerView는 FrameLayout을 상속받으므로, 자식 뷰를 추가할 수 있습니다.
+                LayoutInflater.from(it).inflate(
+                    R.layout.custom_skip_silence_button,
+                    playerView, // playerView를 부모로 지정
+                    true      // 즉시 추가
+                )
+
+                // 3. 추가된 버튼을 찾아서 클릭 리스너를 설정합니다.
+                playerView.findViewById<ImageButton>(R.id.skip_silence_toggle)
+                    .setOnClickListener { viewModel.toggleSilenceSkipping() }
+
+                playerView
+            },
+            update = { playerView ->
+                // 4. uiState가 변경될 때마다 버튼의 아이콘을 업데이트합니다.
+                val skipSilenceButton = playerView.findViewById<ImageButton>(R.id.skip_silence_toggle)
+                val iconRes = if (uiState.isSilenceSkippingEnabled) {
+                    R.drawable.speaker_notes_24px
+                } else {
+                    R.drawable.speaker_notes_off_24px
+                }
+                skipSilenceButton.setImageResource(iconRes)
             }
         )
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // '무음 건너뛰기' 토글 버튼
-        Button(onClick = { viewModel.toggleSilenceSkipping() }) {
-            Text(
-                text = if (uiState.isSilenceSkippingEnabled) {
-                    "무음 건너뛰기 ON"
-                } else {
-                    "무음 건너뛰기 OFF"
-                }
-            )
-        }
     }
 }

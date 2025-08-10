@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImageButton xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/skip_silence_toggle"
+    style="@style/ExoMediaButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom|end"
+    android:layout_marginEnd="60dp"
+    android:layout_marginBottom="20dp"
+    android:src="@drawable/speaker_notes_24px"
+    android:contentDescription="Skip Silence Toggle" />
