@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom|end"
+    android:layout_marginEnd="52dp"
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_fast_section"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
+        <ImageButton
+            android:id="@+id/playback_speed_button"
+            style="@style/ExoMediaButton"
+            android:background="@android:color/transparent"
+            android:src="@drawable/fast_forward_24px"
+            android:contentDescription="Fast button"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+        <TextView
+            android:id="@+id/fast_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#ffffff"
+            app:layout_constraintTop_toBottomOf="@+id/playback_speed_button"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <ImageButton
+        android:id="@+id/skip_silence_toggle"
+        style="@style/ExoMediaButton"
+        android:src="@drawable/speaker_notes_24px"
+        android:contentDescription="Skip Silence Toggle"
+        app:layout_constraintLeft_toRightOf="@+id/cl_fast_section"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

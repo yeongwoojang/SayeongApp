@@ -1,7 +1,10 @@
 package com.sayeong.vv.player
 
 import android.view.LayoutInflater
+import android.widget.Button
 import android.widget.ImageButton
+import android.widget.TextView
+import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -21,9 +24,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
+import org.w3c.dom.Text
 import timber.log.Timber
 
+@OptIn(UnstableApi::class)
 @Composable
 fun PlayerScreen(
     viewModel: PlayerViewModel = hiltViewModel()
@@ -61,24 +67,31 @@ fun PlayerScreen(
                 val playerView = PlayerView(it).apply {
                     player = viewModel.player
                     useController = true // 기본 컨트롤러 UI(재생/정지 버튼, 탐색 바 등)를 사용합니다.
+                    setShowFastForwardButton(true)
                 }
 
-                // 2. 우리가 만든 커스텀 버튼 레이아웃을 가져와서(inflate) PlayerView에 추가합니다.
-                // PlayerView는 FrameLayout을 상속받으므로, 자식 뷰를 추가할 수 있습니다.
-                LayoutInflater.from(it).inflate(
-                    R.layout.custom_skip_silence_button,
-                    playerView, // playerView를 부모로 지정
-                    true      // 즉시 추가
+                val overlayView = LayoutInflater.from(it).inflate(
+                    R.layout.custom_player_overlay,
+                    playerView,
+                    false //_ 자동으로 붙이지 않고, 우리가 직접 addView 할 것이므로 false
                 )
 
+                playerView.addView(overlayView)
                 // 3. 추가된 버튼을 찾아서 클릭 리스너를 설정합니다.
-                playerView.findViewById<ImageButton>(R.id.skip_silence_toggle)
-                    .setOnClickListener { viewModel.toggleSilenceSkipping() }
+                playerView.apply {
+                    findViewById<ImageButton>(R.id.playback_speed_button)
+                        .setOnClickListener { viewModel.changePlaybackSpeed()}
+                    findViewById<ImageButton>(R.id.skip_silence_toggle)
+                        .setOnClickListener { viewModel.toggleSilenceSkipping() }
 
+                }
                 playerView
             },
             update = { playerView ->
                 // 4. uiState가 변경될 때마다 버튼의 아이콘을 업데이트합니다.
+                val speedChangeButton = playerView.findViewById<TextView>(R.id.fast_text)
+                speedChangeButton.text = "${uiState.playbackSpeed}x"
+
                 val skipSilenceButton = playerView.findViewById<ImageButton>(R.id.skip_silence_toggle)
                 val iconRes = if (uiState.isSilenceSkippingEnabled) {
                     R.drawable.speaker_notes_24px
