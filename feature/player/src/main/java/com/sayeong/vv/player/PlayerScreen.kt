@@ -1,24 +1,20 @@
 package com.sayeong.vv.player
 
 import android.view.LayoutInflater
-import android.widget.Button
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -26,7 +22,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
-import org.w3c.dom.Text
 import timber.log.Timber
 
 @OptIn(UnstableApi::class)
@@ -52,53 +47,60 @@ fun PlayerScreen(
         }
     }
 
-//    PlayerLifecycleObserver(viewModel.player)
-    // 5. UI 레이아웃
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        // 기존의 Android View인 PlayerView를 Jetpack Compose에서 사용하기 위해 AndroidView를 사용합니다.
         AndroidView(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(16 / 9f), // 오디오이므로 화면 비율은 중요하지 않지만, 컨트롤러 공간 확보를 위해 설정
-            factory = {
-                // 이 블록은 Composable이 처음 생성될 때 한 번만 호출됩니다.
-                val playerView = PlayerView(it).apply {
+                .aspectRatio(16 / 9f), //_ 오디오이므로 화면 비율은 중요하지 않지만, 컨트롤러 공간 확보를 위해 설정
+            factory = { context ->
+                val playerView = PlayerView(context).apply {
                     player = viewModel.player
                     useController = true // 기본 컨트롤러 UI(재생/정지 버튼, 탐색 바 등)를 사용합니다.
                     setShowFastForwardButton(true)
                 }
 
-                val overlayView = LayoutInflater.from(it).inflate(
+                val overlayView = LayoutInflater.from(context).inflate(
                     R.layout.custom_player_overlay,
                     playerView,
-                    false //_ 자동으로 붙이지 않고, 우리가 직접 addView 할 것이므로 false
+                    false
                 )
 
-                playerView.addView(overlayView)
-                // 3. 추가된 버튼을 찾아서 클릭 리스너를 설정합니다.
-                playerView.apply {
-                    findViewById<ImageButton>(R.id.playback_speed_button)
-                        .setOnClickListener { viewModel.changePlaybackSpeed()}
-                    findViewById<ImageButton>(R.id.skip_silence_toggle)
-                        .setOnClickListener { viewModel.toggleSilenceSkipping() }
+                val bottomBar = playerView.findViewById<ViewGroup?>(androidx.media3.ui.R.id.exo_bottom_bar)
+                bottomBar?.apply {
+                    val basicControls = findViewById<ViewGroup>(androidx.media3.ui.R.id.exo_basic_controls);
+                    val settingsButton = findViewById<View?>(androidx.media3.ui.R.id.exo_settings)
 
+                    if (basicControls != null && settingsButton != null) {
+                        val settingsButtonIndex = basicControls.indexOfChild(settingsButton)
+                        if (settingsButtonIndex != -1) {
+                            basicControls.addView(overlayView, settingsButtonIndex)
+                        } else {
+                            basicControls.addView(overlayView)
+
+                        }
+                    } else {
+                        (playerView as ViewGroup).addView(overlayView)
+                    }
                 }
+
+                overlayView.findViewById<ImageButton>(R.id.playback_speed_button)
+                    .setOnClickListener { viewModel.changePlaybackSpeed() }
+                overlayView.findViewById<TextView>(R.id.skip_silence_toggle)
+                    .setOnClickListener { viewModel.toggleSilenceSkipping() }
                 playerView
             },
             update = { playerView ->
                 // 4. uiState가 변경될 때마다 버튼의 아이콘을 업데이트합니다.
                 val speedChangeButton = playerView.findViewById<TextView>(R.id.fast_text)
                 speedChangeButton.text = "${uiState.playbackSpeed}x"
-
-                val skipSilenceButton = playerView.findViewById<ImageButton>(R.id.skip_silence_toggle)
-                val iconRes = if (uiState.isSilenceSkippingEnabled) {
-                    R.drawable.speaker_notes_24px
+                val skipSilenceButton = playerView.findViewById<TextView>(R.id.skip_silence_toggle)
+                skipSilenceButton.text = if (uiState.isSilenceSkippingEnabled) {
+                    "skip Silence off"
                 } else {
-                    R.drawable.speaker_notes_off_24px
+                    "skip Silence on"
                 }
-                skipSilenceButton.setImageResource(iconRes)
             }
         )
     }

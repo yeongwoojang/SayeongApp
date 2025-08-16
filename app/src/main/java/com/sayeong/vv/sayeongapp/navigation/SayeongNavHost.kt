@@ -23,7 +23,8 @@ fun SayeongNavHost(
         modifier = modifier
     ) {
         composable(SayeongDestination.HOME.route) {
-            HomeScreen()
+//            HomeScreen()
+            PlayerScreen()
         }
 
         composable(SayeongDestination.SECOND.route) {
