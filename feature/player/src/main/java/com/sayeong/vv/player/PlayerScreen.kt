@@ -3,6 +3,7 @@ package com.sayeong.vv.player
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.annotation.OptIn
@@ -55,11 +56,14 @@ fun PlayerScreen(
                 .fillMaxWidth()
                 .aspectRatio(16 / 9f), //_ 오디오이므로 화면 비율은 중요하지 않지만, 컨트롤러 공간 확보를 위해 설정
             factory = { context ->
-                val playerView = PlayerView(context).apply {
-                    player = viewModel.player
-                    useController = true // 기본 컨트롤러 UI(재생/정지 버튼, 탐색 바 등)를 사용합니다.
-                    setShowFastForwardButton(true)
-                }
+                val playerView = LayoutInflater.from(context).inflate(
+                    R.layout.texture_player_view,
+                    FrameLayout(context), // 임시 부모 뷰
+                    false
+                ) as PlayerView
+
+                playerView.player = viewModel.player
+
 
                 val overlayView = LayoutInflater.from(context).inflate(
                     R.layout.custom_player_overlay,
@@ -101,6 +105,9 @@ fun PlayerScreen(
                 } else {
                     "skip Silence on"
                 }
+            },
+            onRelease = { playerView ->
+                playerView.player = null
             }
         )
     }
