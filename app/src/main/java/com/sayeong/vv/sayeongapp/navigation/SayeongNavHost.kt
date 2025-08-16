@@ -5,9 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.sayeong.vv.home.HomeScreen
-import com.sayeong.vv.home.SecondScreen
 import com.sayeong.vv.home.ThirdScreen
 import com.sayeong.vv.player.PlayerScreen
 
