@@ -104,6 +104,7 @@ sayeong-android-application = { id = "sayeong.android.application" }
 sayeong-android-library = { id = "sayeong.android.library" }
 sayeong-android-hilt = { id = "sayeong.android.hilt" }
 sayeong-android-compose = { id = "sayeong.android.compose" }
+sayeong-jvm-library = { id = "sayeong.jvm.library", version = "unspecified" }
 
 
 

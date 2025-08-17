@@ -52,6 +52,10 @@ gradlePlugin {
             id = libs.plugins.sayeong.android.compose.get().pluginId
             implementationClass = "AndroidComposeConventionPlugin"
         }
+        register("jvmLibrary") {
+            id = libs.plugins.sayeong.jvm.library.get().pluginId
+            implementationClass = "JvmLibraryConventionPlugin"
+        }
     }
 }
 
