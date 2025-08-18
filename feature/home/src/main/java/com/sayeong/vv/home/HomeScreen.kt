@@ -21,11 +21,13 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,11 +40,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sayeong.vv.model.TopicResource
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
+
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Adaptive(300.dp),
         contentPadding = PaddingValues(16.dp),
@@ -67,14 +74,49 @@ fun HomeScreen(
                     style = MaterialTheme.typography.titleMedium
                 )
 
-                TopSelection(modifier = Modifier.padding(bottom = 8.dp))
+                TopSectionContent(
+                    uiState = uiState,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
         }
     }
 }
 
 @Composable
+private fun TopSectionContent(
+    uiState: HomeUiState,
+    modifier: Modifier
+) {
+    if (uiState.isLoading) {
+        Box(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    }
+
+    uiState.error?.let { errorMsg ->
+        Text(
+            text = "데이터를 불러오는데 실패했습니다: $errorMsg",
+            modifier = modifier.fillMaxWidth().padding(24.dp),
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.error
+        )
+    }
+
+    if (uiState.topics.isNotEmpty()) {
+        TopSelection(
+            topics = uiState.topics,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+    }
+}
+
+@Composable
 private fun TopSelection(
+    topics: List<TopicResource>,
     modifier: Modifier = Modifier
 ) {
     val lazyGridState = rememberLazyGridState()
@@ -93,12 +135,13 @@ private fun TopSelection(
             contentPadding = PaddingValues(24.dp),
         ) {
             items(
-                items = listOf("음악", "라디오", "33333333", "4444444444", "5555555555", "666666666","777777777,", "88888888", "988888888", "1088888888", "1188888888", "1288888888", "1388888888", "1488888888", "1588888888", "1688888888", "1788888888", "1888888888", "1988888888", "2088888888"),
-                key = { it }
+                items = topics,
+                key = { it.id }
             ) {
                 TopicButton(
-                    name = it,
-                    topicId = it,
+                    name = it.title,
+                    topicId = "${it.id}",
+                    imgUrl = it.imageUrl,
                     isSelected = false,
                     onClick = { }
                 )
@@ -111,6 +154,7 @@ private fun TopSelection(
 private fun TopicButton(
     name: String,
     topicId: String,
+    imgUrl: String,
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {

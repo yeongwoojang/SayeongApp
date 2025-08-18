@@ -42,6 +42,11 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    implementation(libs.coil.kt.compose)
+    implementation(libs.coil.kt.svg)
+    implementation(libs.coil.kt)
+
+
     api(libs.androidx.compose.material3.adaptive)
     api(libs.androidx.compose.material3.navigationSuite)
 }

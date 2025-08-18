@@ -8,6 +8,4 @@ data class FileResource(
     val duration: Int?,
     val artist: String?,
     val genre: String?,
-    val createdAt: String,
-    val updatedAt: String
 )

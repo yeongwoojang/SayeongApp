@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
+import com.sayeong.vv.domain.GetFileListUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +23,8 @@ data class PlayerUiState(
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
     val player: Player,
-    private val silenceSkippingAudioProcessor: SilenceSkippingAudioProcessor
+    private val silenceSkippingAudioProcessor: SilenceSkippingAudioProcessor,
+    private val getFileListUseCase: GetFileListUseCase
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(PlayerUiState())
@@ -51,7 +53,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     private fun preparePlayer() {
-        val mediaItem = MediaItem.fromUri("https://storage.googleapis.com/exoplayer-test-media-0/play.mp3")
+        val mediaItem = MediaItem.fromUri("http://10.0.2.2:3000/uploads/1755420676232-843054759.mp3")
         player.setMediaItem(mediaItem)
         player.prepare()
     }
