@@ -13,6 +13,7 @@ class JvmLibraryConventionPlugin: Plugin<Project> {
             configureKotlinJvm()
 
             dependencies {
+                //_ 순수 kotlin 모듈에서 공통적으로 coroutine을 사용할 수 있도록 처리
                 "implementation"(libs.findLibrary("kotlinx.coroutines.core").get())
             }
         }

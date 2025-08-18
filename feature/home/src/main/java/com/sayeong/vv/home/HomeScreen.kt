@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sayeong.vv.designsystem.component.DynamicAsyncImage
 import com.sayeong.vv.model.TopicResource
 
 @Composable
@@ -177,6 +179,11 @@ private fun TopicButton(
                     .padding(horizontal = 12.dp)
                     .weight(1f),
                 color = MaterialTheme.colorScheme.onSurface,
+            )
+            DynamicAsyncImage(
+                imageUrl = imgUrl,
+                contentDescription = "",
+                modifier = Modifier.size(24.dp),
             )
         }
     }
