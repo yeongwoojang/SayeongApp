@@ -5,6 +5,6 @@ import retrofit2.http.GET
 
 interface SayeongApiService {
     @GET("files")
-    suspend fun getFiles(): List<NetworkFile>
+    suspend fun getFileList(): List<NetworkFile>
 
 }

@@ -28,9 +28,10 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 rootProject.name = "SayeongApp"
 
 include(":app")
-include(":core:data")
 include(":core:domain")
 include(":feature:home")
 include(":feature:player")
 include(":core:network")
 include(":core:designsystem")
+include(":core:model")
+include(":core:data")

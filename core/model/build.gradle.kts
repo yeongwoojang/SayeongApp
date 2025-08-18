@@ -10,9 +10,3 @@ kotlin {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
-
-dependencies {
-    api(projects.core.model)
-
-    implementation(libs.javax.inject)
-}
