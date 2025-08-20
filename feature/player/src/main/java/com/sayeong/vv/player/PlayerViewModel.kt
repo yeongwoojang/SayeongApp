@@ -53,7 +53,7 @@ class PlayerViewModel @Inject constructor(
     }
 
     private fun preparePlayer() {
-        val mediaItem = MediaItem.fromUri("http://10.0.2.2:3000/uploads/1755420676232-843054759.mp3")
+        val mediaItem = MediaItem.fromUri("http://10.0.2.2:3000/uploads/seed-file.mp3")
         player.setMediaItem(mediaItem)
         player.prepare()
     }

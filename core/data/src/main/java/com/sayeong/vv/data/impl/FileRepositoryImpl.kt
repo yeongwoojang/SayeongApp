@@ -4,19 +4,19 @@ import com.sayeong.vv.data.model.toDomainData
 import com.sayeong.vv.domain.FileRepository
 import com.sayeong.vv.model.FileResource
 import com.sayeong.vv.network.api.SayeongApiService
-import timber.log.Timber
+import com.sayeong.vv.network.model.NetworkFileRequest
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class FileRepositoryImpl @Inject constructor(
     private val apiService: SayeongApiService
 ): FileRepository {
-    override suspend fun getFileList(): List<FileResource> {
-        //TODO 파일 리스트 받아와서 결과 값 반환 로직 작성
+    override suspend fun getFileList(): Flow<List<FileResource>> = flow {
+        emit(apiService.getFileList().map { it.toDomainData() })
+    }
 
-        val result = apiService.getFileList().map {
-            it.toDomainData()
-        }
-        Timber.i("getFileList() | result: $result")
-        return result
+    override suspend fun getFileListByGenre(genres: List<String>): Flow<List<FileResource>> = flow {
+        emit(apiService.getFileListByGenre(NetworkFileRequest(genres)).map { it.toDomainData() })
     }
 }

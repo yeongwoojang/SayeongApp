@@ -1,10 +1,13 @@
 package com.sayeong.vv.home
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -14,9 +17,11 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,6 +34,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -41,6 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sayeong.vv.designsystem.component.DynamicAsyncImage
 import com.sayeong.vv.designsystem.component.SayeongButton
+import com.sayeong.vv.home.model.FileUiModel
 import com.sayeong.vv.model.TopicResource
 
 @Composable
@@ -91,28 +99,90 @@ fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth(),
                         onClick = viewModel::onDoneClick,
-                        enable = (uiState as? HomeUiState.Shown)?.selectedTopicIds?.isNotEmpty() ?: false
+                        enable = (uiState as? HomeUiState.Shown)?.selectedTopics?.isNotEmpty() ?: false
                     ) {
                         Text("Done")
                     }
-
-                    if (uiState is HomeUiState.Shown) {
-                        ContentSection(
-                            state = uiState as HomeUiState.Shown
-                        )
-                    }
                 }
+            }
+        }
+
+        fileList(uiState)
+    }
+}
+
+
+private fun LazyStaggeredGridScope.fileList(
+    uiState: HomeUiState
+) {
+    if (uiState is HomeUiState.Shown) {
+        if (uiState.isFileListLoading) {
+            item(span = StaggeredGridItemSpan.FullLine) {
+                Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+        } else if (uiState.files.isNotEmpty()) {
+            val fileUiModels = uiState.files
+            items(
+                items = fileUiModels,
+                key = { it.id }
+            ) { file ->
+                FileListItem(fileUiModel = file)
             }
         }
     }
 }
 
 @Composable
-private fun ContentSection(
-    modifier: Modifier? = Modifier,
-    state: HomeUiState.Shown
-) {
+private fun FileListItem(fileUiModel: FileUiModel) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        color = MaterialTheme.colorScheme.surface,
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 앨범 아트 이미지
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                // 개별 이미지 로딩 스피너
+                if (fileUiModel.isArtLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                }
+                // 앨범 아트가 있으면 표시
+                fileUiModel.albumArt?.let { bitmap ->
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "${fileUiModel.fileResource.originalName} 앨범 아트",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
 
+            Spacer(Modifier.width(16.dp))
+
+            // 파일 정보 (제목, 아티스트 등)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = fileUiModel.fileResource.originalName,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = fileUiModel.fileResource.artist ?: "Unknown Artist",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -161,7 +231,7 @@ private fun TopSectionContent(
                 TopSelection(
                     topics = uiState.topics,
                     modifier = Modifier.padding(bottom = 8.dp),
-                    selectedIds = uiState.selectedTopicIds,
+                    selectedTopics = uiState.selectedTopics,
                     onTopicClick = onTopicClick
                 )
             }
@@ -173,7 +243,7 @@ private fun TopSectionContent(
 private fun TopSelection(
     topics: List<TopicResource>,
     modifier: Modifier = Modifier,
-    selectedIds: Set<String>,
+    selectedTopics: Set<String>,
     onTopicClick: (String) -> Unit = {}
 ) {
     val lazyGridState = rememberLazyGridState()
@@ -197,9 +267,8 @@ private fun TopSelection(
             ) { topic ->
                 TopicButton(
                     name = topic.title,
-                    topicId = "${topic.id}",
                     imgUrl = topic.imageUrl,
-                    isSelected = "${topic.id}" in selectedIds,
+                    isSelected = topic.title in selectedTopics,
                     onClick = onTopicClick
                 )
             }
@@ -210,7 +279,6 @@ private fun TopSelection(
 @Composable
 private fun TopicButton(
     name: String,
-    topicId: String,
     imgUrl: String,
     isSelected: Boolean,
     onClick: (String) -> Unit,
@@ -222,7 +290,7 @@ private fun TopicButton(
         shape = RoundedCornerShape(corner = CornerSize(8.dp)),
         color = MaterialTheme.colorScheme.surface,
         selected = isSelected,
-        onClick = { onClick(topicId) }
+        onClick = { onClick(name) }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -260,7 +328,6 @@ private fun TopicButton(
 fun TopicButtonPreview() {
     TopicButton(
         "힙합",
-        "1",
         "",
         true,
         {}

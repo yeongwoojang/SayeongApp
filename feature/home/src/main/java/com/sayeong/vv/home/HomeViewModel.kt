@@ -1,21 +1,34 @@
 package com.sayeong.vv.home
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sayeong.vv.domain.GetFileListUseCase
+import com.sayeong.vv.domain.GetFilesByGenreUseCase
 import com.sayeong.vv.domain.GetTopicsUseCase
-import com.sayeong.vv.model.TopicResource
+import com.sayeong.vv.home.model.FileUiModel
+import com.sayeong.vv.model.FileResource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getTopicsUseCase: GetTopicsUseCase,
+    private val getFileListUseCase: GetFileListUseCase,
+    private val getFilesByGenreUseCase: GetFilesByGenreUseCase
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -44,21 +57,96 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun onTopicClick(topicId: String) {
+    fun onTopicClick(topic: String) {
         val currentState = _uiState.value
         if (currentState is HomeUiState.Shown) {
-            val oldSelectedIds = currentState.selectedTopicIds
-            val newSelectedIds = if (oldSelectedIds.contains(topicId)) {
-                oldSelectedIds - topicId
+            val oldSelectedIds = currentState.selectedTopics
+            val newSelectedIds = if (oldSelectedIds.contains(topic)) {
+                oldSelectedIds - topic
             } else {
-                oldSelectedIds + topicId
+                oldSelectedIds + topic
             }
 
-            _uiState.update { currentState.copy(selectedTopicIds = newSelectedIds) }
+            _uiState.update { currentState.copy(selectedTopics = newSelectedIds) }
         }
     }
 
     fun onDoneClick() {
-        //TODO TopSelect 영역을 제거 하기 위한 로직 필요
+        val currentState = _uiState.value
+        if (currentState is HomeUiState.Shown && currentState.selectedTopics.isNotEmpty()) {
+            requestFileList(currentState.selectedTopics.toList())
+        }
+    }
+
+    private fun requestFileList(genres: List<String>) {
+        viewModelScope.launch {
+            getFilesByGenreUseCase(genres)
+                .onStart {
+                    _uiState.update {
+                        (it as HomeUiState.Shown).copy(isFileListLoading = true, contentError = null)
+                    }
+                }
+                .catch { throwable ->
+                    _uiState.update {
+                        (it as HomeUiState.Shown).copy(
+                            isFileListLoading = false,
+                            contentError = throwable.message
+                        )
+                    }
+                }
+                .collect { fileResources ->
+                    val initialUiModels = fileResources.map { FileUiModel(fileResource= it) }
+                    _uiState.update {
+                        (it as HomeUiState.Shown).copy(
+                            isFileListLoading = false,
+                            files = initialUiModels
+                        )
+                    }
+
+                    val bitmapJobs = fileResources.map { file ->
+                        async { getBitMap(file) } // async로 감싸서 병렬 실행
+                    }
+
+                    val bitmaps = bitmapJobs.awaitAll()
+
+                    val finalUiModels = fileResources.zip(bitmaps).map { (file, bitmap) ->
+                        FileUiModel(
+                            fileResource = file,
+                            albumArt = bitmap,
+                            isArtLoading = false
+                        )
+                    }
+
+                    _uiState.update { (it as HomeUiState.Shown).copy(files = finalUiModels) }
+                }
+        }
+    }
+
+    private suspend fun getBitMap(fileResource: FileResource): Bitmap? {
+        return withContext(Dispatchers.IO) {
+            val url = "http://10.0.2.2:3000/uploads/${fileResource.originalName}"
+            val retriever = MediaMetadataRetriever()
+            try {
+                // URL로부터 데이터를 설정합니다. 두 번째 인자는 헤더 정보입니다.
+                retriever.setDataSource(url, HashMap<String, String>())
+
+                // getEmbeddedPicture()를 통해 이미지 데이터를 byte 배열로 가져옵니다.
+                val artBytes = retriever.embeddedPicture
+
+                if (artBytes != null) {
+                    // byte 배열을 Bitmap으로 변환하여 반환합니다.
+                    val bitmap = BitmapFactory.decodeByteArray(artBytes, 0, artBytes.size)
+                    bitmap
+                } else {
+                    null // 앨범 아트가 없는 경우 null 반환
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null // 에러 발생 시 null 반환
+            } finally {
+                // 리소스 해제는 필수입니다.
+                retriever.release()
+            }
+        }
     }
 }
