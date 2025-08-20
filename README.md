@@ -15,7 +15,8 @@
 
 
 ### 활용 기술
-* MVVM, Compose, Xml, Hilt, Retrofit, OkHttp3, Media3
+* **Android**: MVVM, Compose, Xml, Hilt, Retrofit, OkHttp3, Media3
+* **backend**: Node.js
 
 ### 구현 기능
 * 오디오 재생 시 무음구간 자동 스킵
