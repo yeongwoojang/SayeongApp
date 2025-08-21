@@ -52,7 +52,7 @@ class HomeViewModel @Inject constructor(
                     if (topics.isNotEmpty()) {
                         _topicUiState.value = TopicUiState.Shown(topics)
                     } else {
-                        _topicUiState.value = TopicUiState.NotShown
+                        _topicUiState.value = TopicUiState.NotShown()
                     }
                 }
         }
@@ -89,7 +89,21 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onDoneClick() {
-        _topicUiState.update { TopicUiState.NotShown }
+        when (val currentState = _topicUiState.value) {
+            is TopicUiState.Shown -> {
+                _topicUiState.value = TopicUiState.NotShown(
+                    topics = currentState.topics,
+                    selectedTopics = currentState.selectedTopics
+                )
+            }
+            is TopicUiState.NotShown -> {
+                _topicUiState.value = TopicUiState.Shown(
+                    topics = currentState.topics,
+                    selectedTopics = currentState.selectedTopics
+                )
+            }
+            else -> {}
+        }
     }
 
     private fun requestFileList(genres: List<String>) {

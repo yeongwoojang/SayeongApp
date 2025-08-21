@@ -71,40 +71,62 @@ fun HomeScreen(
 
         item(span = StaggeredGridItemSpan.FullLine) {
             Column {
-                Text(
-                    text = stringResource(R.string.feature_home_screen_guidance_title),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = stringResource(R.string.feature_home_screen_guidance_sub_title),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp),
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                TopSectionContent(
-                    uiState = topicUiState,
-                    modifier = Modifier.padding(top = 8.dp),
-                    onTopicClick = viewModel::onTopicClick
-                )
+                when (val state = topicUiState) {
+                    is TopicUiState.Loading -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                    is TopicUiState.Error -> {
+                        val errorMsg = state.message
+                        if (errorMsg != null) {
+                            Text(
+                                text = "데이터를 불러오는데 실패했습니다: $errorMsg",
+                                modifier = Modifier.padding(top = 8.dp)
+                                    .fillMaxWidth()
+                                    .padding(24.dp),
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                    is TopicUiState.Shown -> {
+                        TopSectionContent(
+                            topics = state.topics,
+                            selectedTopics = state.selectedTopics,
+                            modifier = Modifier.padding(top = 8.dp),
+                            onTopicClick = viewModel::onTopicClick
+                        )
+                    }
+                    else -> {}
+                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
+                    val isButtonEnable = ((topicUiState as? TopicUiState.Shown)?.selectedTopics?.isNotEmpty() == true
+                            && (musicUiState as? MusicUiState.Shown)?.files?.isNotEmpty() == true
+                            || topicUiState is TopicUiState.NotShown)
+
                     SayeongButton(
                         modifier = Modifier
                             .fillMaxWidth(),
                         onClick = viewModel::onDoneClick,
-                        enable = (topicUiState as? TopicUiState.Shown)?.selectedTopics?.isNotEmpty() ?: false
+                        enable = isButtonEnable
                     ) {
-                        Text("Done")
+                        val buttonText = if (topicUiState is TopicUiState.Shown) {
+                            "Done"
+                        } else if (topicUiState is TopicUiState.NotShown){
+                            "Refresh"
+                        } else "Done"
+
+                        Text(text = buttonText)
                     }
                 }
             }
@@ -217,44 +239,35 @@ private fun MusicItem(
 
 @Composable
 private fun TopSectionContent(
-    uiState: TopicUiState,
+    topics: List<TopicResource>,
+    selectedTopics: Set<String>,
     modifier: Modifier,
     onTopicClick: (String) -> Unit
 ) {
-    when(uiState) {
-        is TopicUiState.Loading -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        }
+    if (topics.isNotEmpty()) {
+        Text(
+            text = stringResource(R.string.feature_home_screen_guidance_title),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp),
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(
+            text = stringResource(R.string.feature_home_screen_guidance_sub_title),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp),
+            style = MaterialTheme.typography.titleMedium
+        )
 
-        is TopicUiState.Error -> {
-            val errorMsg = uiState.message
-            Text(
-                text = "데이터를 불러오는데 실패했습니다: $errorMsg",
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.error
-            )
-        }
-
-        is TopicUiState.Shown -> {
-            if (uiState.topics.isNotEmpty()) {
-                TopSelection(
-                    topics = uiState.topics,
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    selectedTopics = uiState.selectedTopics,
-                    onTopicClick = onTopicClick
-                )
-            }
-        } else -> {}
+        TopSelection(
+            topics = topics,
+            modifier = modifier.padding(bottom = 8.dp),
+            selectedTopics = selectedTopics,
+            onTopicClick = onTopicClick
+        )
     }
 }
 
