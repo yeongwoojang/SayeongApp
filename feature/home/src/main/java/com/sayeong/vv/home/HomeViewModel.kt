@@ -29,8 +29,11 @@ class HomeViewModel @Inject constructor(
     private val getFilesByGenreUseCase: GetFilesByGenreUseCase
 ): ViewModel() {
 
-    private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
-    val uiState = _uiState.asStateFlow()
+    private val _topicUiState = MutableStateFlow<TopicUiState>(TopicUiState.Loading)
+    val topicUiState = _topicUiState.asStateFlow()
+
+    private val _musicUiState = MutableStateFlow<MusicUiState>(MusicUiState.Shown(files = emptyList()))
+    val musicUiState = _musicUiState.asStateFlow()
 
     init {
         getTopics()
@@ -40,24 +43,24 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             getTopicsUseCase()
                 .onStart {
-                    _uiState.value = HomeUiState.Loading
+                    _topicUiState.value = TopicUiState.Loading
                 }
                 .catch { throwable ->
-                    _uiState.value = HomeUiState.Error(throwable.message)
+                    _topicUiState.value = TopicUiState.Error(throwable.message)
                 }
                 .collect { topics ->
                     if (topics.isNotEmpty()) {
-                        _uiState.value = HomeUiState.Shown(topics)
+                        _topicUiState.value = TopicUiState.Shown(topics)
                     } else {
-                        _uiState.value = HomeUiState.NotShownTopic
+                        _topicUiState.value = TopicUiState.NotShown
                     }
                 }
         }
     }
 
     fun onTopicClick(topic: String) {
-        val currentState = _uiState.value
-        if (currentState is HomeUiState.Shown) {
+        val currentState = _topicUiState.value
+        if (currentState is TopicUiState.Shown) {
             val oldSelectedIds = currentState.selectedTopics
             val newSelectedIds = if (oldSelectedIds.contains(topic)) {
                 oldSelectedIds - topic
@@ -65,12 +68,12 @@ class HomeViewModel @Inject constructor(
                 oldSelectedIds + topic
             }
 
-            _uiState.update { currentState.copy(selectedTopics = newSelectedIds) }
+            _topicUiState.update { currentState.copy(selectedTopics = newSelectedIds) }
             if (newSelectedIds.isNotEmpty()) {
                 selectTopic()
             } else {
-                _uiState.update {
-                    (it as HomeUiState.Shown).copy(
+                _musicUiState.update {
+                    (it as MusicUiState.Shown).copy(
                         files = emptyList()
                     )
                 }
@@ -79,33 +82,33 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun selectTopic() {
-        val currentState = _uiState.value
-        if (currentState is HomeUiState.Shown && currentState.selectedTopics.isNotEmpty()) {
+        val currentState = _topicUiState.value
+        if (currentState is TopicUiState.Shown && currentState.selectedTopics.isNotEmpty()) {
             requestFileList(currentState.selectedTopics.toList())
         }
     }
 
     fun onDoneClick() {
-       //TODO Topic 목록을 제거
-        _uiState.update { HomeUiState.NotShownTopic }
+        _topicUiState.update { TopicUiState.NotShown }
     }
 
     private fun requestFileList(genres: List<String>) {
         viewModelScope.launch {
             getFilesByGenreUseCase(genres)
                 .catch { throwable ->
-                    _uiState.update {
-                        (it as HomeUiState.Shown).copy(
-                            contentError = throwable.message
-                        )
-                    }
+                    _musicUiState.value = MusicUiState.Error(throwable.message)
                 }
                 .collect { fileResources ->
                     val initialUiModels = fileResources.map { FileUiModel(fileResource= it) }
-                    _uiState.update {
-                        (it as HomeUiState.Shown).copy(
-                            files = initialUiModels
-                        )
+                    val currentState = _musicUiState.value
+                    if (currentState is MusicUiState.Shown) {
+                        _musicUiState.update {
+                            (it as MusicUiState.Shown).copy(
+                                files = initialUiModels
+                            )
+                        }
+                    } else {
+                        _musicUiState.value = MusicUiState.Shown(initialUiModels)
                     }
 
                     val bitmapJobs = fileResources.map { file ->
@@ -122,22 +125,22 @@ class HomeViewModel @Inject constructor(
                         )
                     }
 
-                    _uiState.update { (it as HomeUiState.Shown).copy(files = finalUiModels) }
+                    _musicUiState.update { (it as MusicUiState.Shown).copy(files = finalUiModels) }
                 }
         }
     }
 
     fun toggleBookMark(fileResource: FileResource) {
         Timber.i("toggleBookMark() | fileResource: $fileResource")
-        val currentState = _uiState.value
-        if (currentState is HomeUiState.Shown) {
+        val currentState = _musicUiState.value
+        if (currentState is MusicUiState.Shown) {
             val oldBookmarkedMusics = currentState.bookmarkedMusics
             val newBookMarkedMusics = if (fileResource in oldBookmarkedMusics) {
                 oldBookmarkedMusics - fileResource
             } else {
                 oldBookmarkedMusics + fileResource
             }
-            _uiState.update { (it as HomeUiState.Shown).copy(bookmarkedMusics = newBookMarkedMusics) }
+            _musicUiState.update { (it as MusicUiState.Shown).copy(bookmarkedMusics = newBookMarkedMusics) }
         }
     }
 

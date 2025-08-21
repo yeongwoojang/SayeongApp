@@ -27,10 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconButtonDefaults.iconToggleButtonColors
-import androidx.compose.material3.IconToggleButton
-import androidx.compose.material3.IconToggleButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -62,7 +58,8 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
 
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val topicUiState by viewModel.topicUiState.collectAsStateWithLifecycle()
+    val musicUiState by viewModel.musicUiState.collectAsStateWithLifecycle()
 
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Adaptive(300.dp),
@@ -92,7 +89,7 @@ fun HomeScreen(
                 )
 
                 TopSectionContent(
-                    uiState = uiState,
+                    uiState = topicUiState,
                     modifier = Modifier.padding(top = 8.dp),
                     onTopicClick = viewModel::onTopicClick
                 )
@@ -105,7 +102,7 @@ fun HomeScreen(
                         modifier = Modifier
                             .fillMaxWidth(),
                         onClick = viewModel::onDoneClick,
-                        enable = (uiState as? HomeUiState.Shown)?.selectedTopics?.isNotEmpty() ?: false
+                        enable = (topicUiState as? TopicUiState.Shown)?.selectedTopics?.isNotEmpty() ?: false
                     ) {
                         Text("Done")
                     }
@@ -114,7 +111,7 @@ fun HomeScreen(
         }
 
         musicList(
-            uiState,
+            musicUiState,
             onClick = viewModel::toggleBookMark
         )
     }
@@ -122,10 +119,10 @@ fun HomeScreen(
 
 
 private fun LazyStaggeredGridScope.musicList(
-    uiState: HomeUiState,
+    uiState: MusicUiState,
     onClick: (FileResource) -> Unit
 ) {
-    if (uiState is HomeUiState.Shown) {
+    if (uiState is MusicUiState.Shown) {
         if (uiState.files.isNotEmpty()) {
             val fileUiModels = uiState.files
             items(
@@ -220,12 +217,12 @@ private fun MusicItem(
 
 @Composable
 private fun TopSectionContent(
-    uiState: HomeUiState,
+    uiState: TopicUiState,
     modifier: Modifier,
     onTopicClick: (String) -> Unit
 ) {
     when(uiState) {
-        is HomeUiState.Loading -> {
+        is TopicUiState.Loading -> {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -236,7 +233,7 @@ private fun TopSectionContent(
             }
         }
 
-        is HomeUiState.Error -> {
+        is TopicUiState.Error -> {
             val errorMsg = uiState.message
             Text(
                 text = "데이터를 불러오는데 실패했습니다: $errorMsg",
@@ -248,7 +245,7 @@ private fun TopSectionContent(
             )
         }
 
-        is HomeUiState.Shown -> {
+        is TopicUiState.Shown -> {
             if (uiState.topics.isNotEmpty()) {
                 TopSelection(
                     topics = uiState.topics,
