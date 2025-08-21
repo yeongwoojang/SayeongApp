@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sayeong.vv.domain.GetFileListUseCase
 import com.sayeong.vv.domain.GetFilesByGenreUseCase
 import com.sayeong.vv.domain.GetTopicsUseCase
 import com.sayeong.vv.home.model.FileUiModel
@@ -27,7 +26,6 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getTopicsUseCase: GetTopicsUseCase,
-    private val getFileListUseCase: GetFileListUseCase,
     private val getFilesByGenreUseCase: GetFilesByGenreUseCase
 ): ViewModel() {
 
@@ -51,7 +49,7 @@ class HomeViewModel @Inject constructor(
                     if (topics.isNotEmpty()) {
                         _uiState.value = HomeUiState.Shown(topics)
                     } else {
-                        _uiState.value = HomeUiState.NotShown
+                        _uiState.value = HomeUiState.NotShownTopic
                     }
                 }
         }
@@ -68,28 +66,36 @@ class HomeViewModel @Inject constructor(
             }
 
             _uiState.update { currentState.copy(selectedTopics = newSelectedIds) }
+            if (newSelectedIds.isNotEmpty()) {
+                selectTopic()
+            } else {
+                _uiState.update {
+                    (it as HomeUiState.Shown).copy(
+                        files = emptyList()
+                    )
+                }
+            }
         }
     }
 
-    fun onDoneClick() {
+    private fun selectTopic() {
         val currentState = _uiState.value
         if (currentState is HomeUiState.Shown && currentState.selectedTopics.isNotEmpty()) {
             requestFileList(currentState.selectedTopics.toList())
         }
     }
 
+    fun onDoneClick() {
+       //TODO Topic 목록을 제거
+        _uiState.update { HomeUiState.NotShownTopic }
+    }
+
     private fun requestFileList(genres: List<String>) {
         viewModelScope.launch {
             getFilesByGenreUseCase(genres)
-                .onStart {
-                    _uiState.update {
-                        (it as HomeUiState.Shown).copy(isFileListLoading = true, contentError = null)
-                    }
-                }
                 .catch { throwable ->
                     _uiState.update {
                         (it as HomeUiState.Shown).copy(
-                            isFileListLoading = false,
                             contentError = throwable.message
                         )
                     }
@@ -98,7 +104,6 @@ class HomeViewModel @Inject constructor(
                     val initialUiModels = fileResources.map { FileUiModel(fileResource= it) }
                     _uiState.update {
                         (it as HomeUiState.Shown).copy(
-                            isFileListLoading = false,
                             files = initialUiModels
                         )
                     }
@@ -119,6 +124,20 @@ class HomeViewModel @Inject constructor(
 
                     _uiState.update { (it as HomeUiState.Shown).copy(files = finalUiModels) }
                 }
+        }
+    }
+
+    fun toggleBookMark(fileResource: FileResource) {
+        Timber.i("toggleBookMark() | fileResource: $fileResource")
+        val currentState = _uiState.value
+        if (currentState is HomeUiState.Shown) {
+            val oldBookmarkedMusics = currentState.bookmarkedMusics
+            val newBookMarkedMusics = if (fileResource in oldBookmarkedMusics) {
+                oldBookmarkedMusics - fileResource
+            } else {
+                oldBookmarkedMusics + fileResource
+            }
+            _uiState.update { (it as HomeUiState.Shown).copy(bookmarkedMusics = newBookMarkedMusics) }
         }
     }
 

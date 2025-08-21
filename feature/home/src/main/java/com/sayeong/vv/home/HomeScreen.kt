@@ -27,6 +27,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.IconButtonDefaults.iconToggleButtonColors
+import androidx.compose.material3.IconToggleButton
+import androidx.compose.material3.IconToggleButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -49,6 +54,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sayeong.vv.designsystem.component.DynamicAsyncImage
 import com.sayeong.vv.designsystem.component.SayeongButton
 import com.sayeong.vv.home.model.FileUiModel
+import com.sayeong.vv.model.FileResource
 import com.sayeong.vv.model.TopicResource
 
 @Composable
@@ -107,37 +113,45 @@ fun HomeScreen(
             }
         }
 
-        fileList(uiState)
+        musicList(
+            uiState,
+            onClick = viewModel::toggleBookMark
+        )
     }
 }
 
 
-private fun LazyStaggeredGridScope.fileList(
-    uiState: HomeUiState
+private fun LazyStaggeredGridScope.musicList(
+    uiState: HomeUiState,
+    onClick: (FileResource) -> Unit
 ) {
     if (uiState is HomeUiState.Shown) {
-        if (uiState.isFileListLoading) {
-            item(span = StaggeredGridItemSpan.FullLine) {
-                Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
-        } else if (uiState.files.isNotEmpty()) {
+        if (uiState.files.isNotEmpty()) {
             val fileUiModels = uiState.files
             items(
                 items = fileUiModels,
                 key = { it.id }
             ) { file ->
-                FileListItem(fileUiModel = file)
+                MusicItem(
+                    isBookmarked = file.fileResource in uiState.bookmarkedMusics,
+                    fileUiModel = file,
+                    modifier = Modifier.fillMaxWidth().animateItem(),
+                    onClick = onClick
+                )
             }
         }
     }
 }
 
 @Composable
-private fun FileListItem(fileUiModel: FileUiModel) {
+private fun MusicItem(
+    isBookmarked: Boolean,
+    fileUiModel: FileUiModel,
+    modifier: Modifier,
+    onClick: (FileResource) -> Unit = {}
+) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         shape = RoundedCornerShape(8.dp),
         color = MaterialTheme.colorScheme.surface,
     ) {
@@ -181,6 +195,25 @@ private fun FileListItem(fileUiModel: FileUiModel) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+
+            FilledIconToggleButton(
+                checked = isBookmarked,
+                onCheckedChange = { onClick(fileUiModel.fileResource) },
+                colors = iconToggleButtonColors(
+                    checkedContainerColor = MaterialTheme.colorScheme.onSecondary,
+                ),
+                modifier = Modifier.size(30.dp),
+            ) {
+                val imageResource = if (isBookmarked) {
+                    painterResource(R.drawable.bookmark_filled_24px)
+                } else {
+                    painterResource(R.drawable.bookmark_24px)
+                }
+                Icon(
+                    imageResource,
+                    contentDescription = "bookmark",
+                )
+            }
         }
     }
 }
@@ -215,17 +248,6 @@ private fun TopSectionContent(
             )
         }
 
-        is HomeUiState.NotShown -> {
-            Text(
-                text = "데이터가 존재하지 않습니다.",
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.error
-            )
-        }
-
         is HomeUiState.Shown -> {
             if (uiState.topics.isNotEmpty()) {
                 TopSelection(
@@ -235,7 +257,7 @@ private fun TopSectionContent(
                     onTopicClick = onTopicClick
                 )
             }
-        }
+        } else -> {}
     }
 }
 
