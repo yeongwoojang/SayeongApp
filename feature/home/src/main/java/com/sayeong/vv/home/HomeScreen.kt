@@ -49,8 +49,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sayeong.vv.designsystem.component.DynamicAsyncImage
 import com.sayeong.vv.designsystem.component.SayeongButton
-import com.sayeong.vv.home.model.FileUiModel
-import com.sayeong.vv.model.FileResource
+import com.sayeong.vv.home.model.MusicUiModel
+import com.sayeong.vv.model.MusicResource
 import com.sayeong.vv.model.TopicResource
 
 @Composable
@@ -100,7 +100,7 @@ fun HomeScreen(
                             topics = state.topics,
                             selectedTopics = state.selectedTopics,
                             modifier = Modifier.padding(top = 8.dp),
-                            onTopicClick = viewModel::onTopicClick
+                            onTopicClick = viewModel::selectTopic
                         )
                     }
                     else -> {}
@@ -142,7 +142,7 @@ fun HomeScreen(
 
 private fun LazyStaggeredGridScope.musicList(
     uiState: MusicUiState,
-    onClick: (FileResource) -> Unit
+    onClick: (MusicResource) -> Unit
 ) {
     if (uiState is MusicUiState.Shown) {
         if (uiState.files.isNotEmpty()) {
@@ -152,7 +152,7 @@ private fun LazyStaggeredGridScope.musicList(
                 key = { it.id }
             ) { file ->
                 MusicItem(
-                    isBookmarked = file.fileResource in uiState.bookmarkedMusics,
+                    isBookmarked = file.musicResource in uiState.bookmarkedMusics,
                     fileUiModel = file,
                     modifier = Modifier.fillMaxWidth().animateItem(),
                     onClick = onClick
@@ -165,9 +165,9 @@ private fun LazyStaggeredGridScope.musicList(
 @Composable
 private fun MusicItem(
     isBookmarked: Boolean,
-    fileUiModel: FileUiModel,
+    fileUiModel: MusicUiModel,
     modifier: Modifier,
-    onClick: (FileResource) -> Unit = {}
+    onClick: (MusicResource) -> Unit = {}
 ) {
     Surface(
         modifier = modifier,
@@ -193,7 +193,7 @@ private fun MusicItem(
                 fileUiModel.albumArt?.let { bitmap ->
                     Image(
                         bitmap = bitmap.asImageBitmap(),
-                        contentDescription = "${fileUiModel.fileResource.originalName} 앨범 아트",
+                        contentDescription = "${fileUiModel.musicResource.originalName} 앨범 아트",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -205,11 +205,11 @@ private fun MusicItem(
             // 파일 정보 (제목, 아티스트 등)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = fileUiModel.fileResource.originalName,
+                    text = fileUiModel.musicResource.originalName,
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = fileUiModel.fileResource.artist ?: "Unknown Artist",
+                    text = fileUiModel.musicResource.artist ?: "Unknown Artist",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -217,7 +217,7 @@ private fun MusicItem(
 
             FilledIconToggleButton(
                 checked = isBookmarked,
-                onCheckedChange = { onClick(fileUiModel.fileResource) },
+                onCheckedChange = { onClick(fileUiModel.musicResource) },
                 colors = iconToggleButtonColors(
                     checkedContainerColor = MaterialTheme.colorScheme.onSecondary,
                 ),

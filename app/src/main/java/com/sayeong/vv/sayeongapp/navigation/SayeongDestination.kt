@@ -1,10 +1,6 @@
 package com.sayeong.vv.sayeongapp.navigation
 
 import androidx.annotation.DrawableRes
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.sayeong.vv.sayeongapp.R
 
 sealed class SayeongDestination(
@@ -17,15 +13,15 @@ sealed class SayeongDestination(
         label = "Home",
         icon = R.drawable.home_24px
     )
-    object SECOND: SayeongDestination(
-        route = "second",
-        label = "Second",
-        icon = R.drawable.home_24px
+    object BOOKMARK: SayeongDestination(
+        route = "bookmark",
+        label = "Bookmark",
+        icon = com.sayeong.vv.home.R.drawable.bookmark_24px
 
     )
-    object Third: SayeongDestination(
-        route = "third",
-        label = "Third",
-        icon = R.drawable.home_24px
+    object SEARCH: SayeongDestination(
+        route = "search",
+        label = "Search",
+        icon = com.sayeong.vv.home.R.drawable.search_24px
     )
 }

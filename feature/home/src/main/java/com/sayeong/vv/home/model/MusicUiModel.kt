@@ -1,12 +1,12 @@
 package com.sayeong.vv.home.model
 
 import android.graphics.Bitmap
-import com.sayeong.vv.model.FileResource
+import com.sayeong.vv.model.MusicResource
 
-data class FileUiModel(
-    val fileResource: FileResource,
+data class MusicUiModel(
+    val musicResource: MusicResource,
     val albumArt: Bitmap? = null,
     val isArtLoading: Boolean = false,
 ) {
-    val id: Int get() = fileResource.id
+    val id: Int get() = musicResource.id
 }

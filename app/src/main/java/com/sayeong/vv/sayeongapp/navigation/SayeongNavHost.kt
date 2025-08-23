@@ -24,11 +24,11 @@ fun SayeongNavHost(
             HomeScreen()
         }
 
-        composable(SayeongDestination.SECOND.route) {
+        composable(SayeongDestination.BOOKMARK.route) {
             PlayerScreen()
         }
 
-        composable(SayeongDestination.Third.route) {
+        composable(SayeongDestination.SEARCH.route) {
             ThirdScreen()
         }
     }

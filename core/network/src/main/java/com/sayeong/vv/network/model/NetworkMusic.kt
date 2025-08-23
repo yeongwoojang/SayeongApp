@@ -1,8 +1,6 @@
 package com.sayeong.vv.network.model
 
-import com.google.gson.annotations.SerializedName
-
-data class NetworkFile(
+data class NetworkMusic(
     val id: Int,
     val originalName: String = "",
     val storedFileName: String = "",

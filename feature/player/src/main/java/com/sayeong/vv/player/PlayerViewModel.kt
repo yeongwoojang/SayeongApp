@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
-import com.sayeong.vv.domain.GetFileListUseCase
+import com.sayeong.vv.domain.GetMusicListUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +24,7 @@ data class PlayerUiState(
 class PlayerViewModel @Inject constructor(
     val player: Player,
     private val silenceSkippingAudioProcessor: SilenceSkippingAudioProcessor,
-    private val getFileListUseCase: GetFileListUseCase
+    private val getFileListUseCase: GetMusicListUseCase
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(PlayerUiState())

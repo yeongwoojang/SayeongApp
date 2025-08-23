@@ -9,20 +9,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sayeong.vv.designsystem.component.SayeongBackground
 import com.sayeong.vv.designsystem.component.SayeongGradientBackground
 import com.sayeong.vv.designsystem.theme.LocalGradientColors
-import com.sayeong.vv.home.HomeScreen
-import com.sayeong.vv.sayeongapp.R
 import com.sayeong.vv.sayeongapp.navigation.SayeongDestination
 import com.sayeong.vv.sayeongapp.navigation.SayeongNavHost
 
@@ -34,8 +29,8 @@ fun SayeongApp(
 
     val destinations = listOf(
         SayeongDestination.HOME,
-        SayeongDestination.SECOND,
-        SayeongDestination.Third
+        SayeongDestination.BOOKMARK,
+        SayeongDestination.SEARCH
     )
 
 

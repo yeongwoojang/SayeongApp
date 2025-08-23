@@ -1,7 +1,5 @@
 package com.sayeong.vv.home
 
-import com.sayeong.vv.home.model.FileUiModel
-import com.sayeong.vv.model.FileResource
 import com.sayeong.vv.model.TopicResource
 
 sealed interface TopicUiState {
