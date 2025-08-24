@@ -55,7 +55,8 @@ import com.sayeong.vv.model.TopicResource
 
 @Composable
 fun HomeScreen(
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    onMusicClick: (MusicResource) -> Unit
 ) {
 
     val topicUiState by viewModel.topicUiState.collectAsStateWithLifecycle()
@@ -134,15 +135,16 @@ fun HomeScreen(
 
         musicList(
             musicUiState,
-            onClick = viewModel::toggleBookMark
+            onToggleBookMark = viewModel::toggleBookMark,
+            onMusicClick = onMusicClick
         )
     }
 }
 
-
 private fun LazyStaggeredGridScope.musicList(
     uiState: MusicUiState,
-    onClick: (MusicResource) -> Unit
+    onToggleBookMark: (MusicResource) -> Unit,
+    onMusicClick: (MusicResource) -> Unit
 ) {
     if (uiState is MusicUiState.Shown) {
         if (uiState.files.isNotEmpty()) {
@@ -155,7 +157,8 @@ private fun LazyStaggeredGridScope.musicList(
                     isBookmarked = file.musicResource in uiState.bookmarkedMusics,
                     fileUiModel = file,
                     modifier = Modifier.fillMaxWidth().animateItem(),
-                    onClick = onClick
+                    onToggleBookMark = { onToggleBookMark(file.musicResource) },
+                    onMusicClick = { onMusicClick(file.musicResource) }
                 )
             }
         }
@@ -167,12 +170,14 @@ private fun MusicItem(
     isBookmarked: Boolean,
     fileUiModel: MusicUiModel,
     modifier: Modifier,
-    onClick: (MusicResource) -> Unit = {}
+    onToggleBookMark: () -> Unit = {},
+    onMusicClick: () -> Unit = {}
 ) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(8.dp),
         color = MaterialTheme.colorScheme.surface,
+        onClick = onMusicClick
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -217,7 +222,7 @@ private fun MusicItem(
 
             FilledIconToggleButton(
                 checked = isBookmarked,
-                onCheckedChange = { onClick(fileUiModel.musicResource) },
+                onCheckedChange = { onToggleBookMark() },
                 colors = iconToggleButtonColors(
                     checkedContainerColor = MaterialTheme.colorScheme.onSecondary,
                 ),
@@ -369,4 +374,9 @@ fun TopicButtonPreview() {
 @Composable
 fun ThirdScreen() {
     Text("Third")
+}
+
+@Composable
+fun BookMarkScreen() {
+    Text("BookMark")
 }

@@ -1,0 +1,30 @@
+package com.sayeong.vv.player.component
+
+import androidx.annotation.OptIn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.compose.state.rememberShuffleButtonState
+
+@OptIn(UnstableApi::class)
+@Composable
+internal fun ShuffleButton(player: Player, modifier: Modifier = Modifier) {
+    val state = rememberShuffleButtonState(player)
+    val icon = if (state.shuffleOn) Icons.Default.Add else Icons.Default.AddCircle
+    val contentDescription =
+        if (state.shuffleOn) {
+            "셔플 on"
+        } else {
+            "셔플 off"
+        }
+    IconButton(onClick = state::onClick, modifier = modifier, enabled = state.isEnabled) {
+        Icon(icon, contentDescription = contentDescription, modifier = modifier)
+    }
+}

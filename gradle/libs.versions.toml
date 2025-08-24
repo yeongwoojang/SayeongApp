@@ -22,7 +22,7 @@ truth = "1.4.4"
 timber = "5.0.1"
 coroutines = "1.8.0"
 androidDesugarJdkLibs = "2.0.3"
-exoplayer = "1.8.0"
+media3 = "1.8.0"
 navigation = "2.9.3"
 androidxHiltNavigationCompose = "1.2.0"
 androidxComposeMaterial3Adaptive = "1.1.0-rc01"
@@ -63,11 +63,11 @@ javax-inject = { module = "javax.inject:javax.inject", version = "1" }
 
 
 #_ exoplayer
-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "exoplayer" }
-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "exoplayer" }
-media3-ui-compose = { group = "androidx.media3", name = "media3-ui-compose", version.ref = "exoplayer" }
-media3-exoplayer-hls = { group = "androidx.media3", name = "media3-exoplayer-hls", version.ref = "exoplayer" }
-media3-exoplayer-dash = { group = "androidx.media3", name = "media3-exoplayer-dash", version.ref = "exoplayer" }
+media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
+media3-ui-compose = { group = "androidx.media3", name = "media3-ui-compose", version.ref = "media3" }
+media3-exoplayer-hls = { group = "androidx.media3", name = "media3-exoplayer-hls", version.ref = "media3" }
+media3-exoplayer-dash = { group = "androidx.media3", name = "media3-exoplayer-dash", version.ref = "media3" }
 
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }

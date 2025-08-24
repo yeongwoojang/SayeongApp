@@ -1,16 +1,21 @@
 package com.sayeong.vv.sayeongapp.ui
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -18,8 +23,11 @@ import androidx.navigation.compose.rememberNavController
 import com.sayeong.vv.designsystem.component.SayeongBackground
 import com.sayeong.vv.designsystem.component.SayeongGradientBackground
 import com.sayeong.vv.designsystem.theme.LocalGradientColors
+import com.sayeong.vv.player.PlayerScreen
+import com.sayeong.vv.player.PlayerViewModel
 import com.sayeong.vv.sayeongapp.navigation.SayeongDestination
 import com.sayeong.vv.sayeongapp.navigation.SayeongNavHost
+import kotlinx.coroutines.launch
 
 @Composable
 fun SayeongApp(
@@ -27,54 +35,74 @@ fun SayeongApp(
 ) {
     val navController = rememberNavController()
 
+    // 1. BottomSheet의 상태를 관리할 State와 CoroutineScope를 생성합니다.
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    val scope = rememberCoroutineScope()
+
+    val playerViewModel: PlayerViewModel = hiltViewModel()
+
     val destinations = listOf(
         SayeongDestination.HOME,
         SayeongDestination.BOOKMARK,
         SayeongDestination.SEARCH
     )
 
-
     SayeongBackground(modifier = Modifier) {
         SayeongGradientBackground(gradientColors = LocalGradientColors.current) {
-            Scaffold(
+            BottomSheetScaffold(
+                scaffoldState = scaffoldState,
+                sheetContent = {
+                    PlayerScreen(viewModel = playerViewModel)
+                },
+                sheetPeekHeight = 0.dp, //_ 초기에는 시트 미노출
                 containerColor = Color.Transparent,
-                bottomBar = {
-                    NavigationBar {
-                        val navBackStackEntry by navController.currentBackStackEntryAsState()
-                        val currentDestination = navBackStackEntry?.destination
+            ) { innerPadding ->
+                Scaffold(
+                    containerColor = Color.Transparent,
+                    bottomBar = {
+                        NavigationBar {
+                            val navBackStackEntry by navController.currentBackStackEntryAsState()
+                            val currentDestination = navBackStackEntry?.destination
 
-                        destinations.forEach { destination ->
-                            val selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true
-                            NavigationBarItem(
-                                selected = selected,
-                                onClick = {
-                                    navController.navigate(destination.route) {
-                                        //_ 백스택 관리를 위한 로직
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
+                            destinations.forEach { destination ->
+                                val selected = currentDestination?.hierarchy?.any { it.route == destination.route } == true
+                                NavigationBarItem(
+                                    selected = selected,
+                                    onClick = {
+                                        navController.navigate(destination.route) {
+                                            //_ 백스택 관리를 위한 로직
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
                                         }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                },
-                                icon = {
-                                    Icon(
-                                        painter = painterResource(id = destination.icon),
-                                        contentDescription = destination.label
-                                    )
-                                },
-                                label = { Text(destination.label) }
+                                    },
+                                    icon = {
+                                        Icon(
+                                            painter = painterResource(id = destination.icon),
+                                            contentDescription = destination.label
+                                        )
+                                    },
+                                    label = { Text(destination.label) }
 
-                            )
+                                )
 
+                            }
                         }
                     }
+                ) { innerScaffoldPadding ->
+                    SayeongNavHost(
+                        modifier = Modifier.padding(innerScaffoldPadding),
+                        navController,
+                        onMusicClick = { music ->
+                            playerViewModel.playMusic(music)
+                            scope.launch {
+                                scaffoldState.bottomSheetState.expand()
+                            }
+                        }
+                    )
                 }
-            ) { innerPadding ->
-                SayeongNavHost(
-                    modifier = Modifier.padding(innerPadding),
-                    navController
-                )
             }
         }
     }
