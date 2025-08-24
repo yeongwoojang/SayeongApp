@@ -27,6 +27,7 @@ navigation = "2.9.3"
 androidxHiltNavigationCompose = "1.2.0"
 androidxComposeMaterial3Adaptive = "1.1.0-rc01"
 coil = "2.7.0"
+palette = "1.0.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -92,6 +93,8 @@ androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navig
 coil-kt = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 coil-kt-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 coil-kt-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
+
+palette-ktx = {group ="androidx.palette", name ="palette-ktx", version.ref = "palette"}
 
 
 [plugins]

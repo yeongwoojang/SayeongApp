@@ -2,24 +2,31 @@ package com.sayeong.vv.player
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
+import androidx.palette.graphics.Palette
 import com.sayeong.vv.domain.GetAlbumArtUseCase
 import com.sayeong.vv.model.MusicResource
 import com.sayeong.vv.player.model.LoadedState
 import com.sayeong.vv.player.model.PlayerState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
+
+private data class AlbumArtResult(val bitmap: Bitmap, val domainColor: Color, val gradientColor: Color)
+
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
@@ -57,6 +64,8 @@ class PlayerViewModel @Inject constructor(
                         duration = player.duration,
                         currentPosition = currentState.currentPosition,
                         playbackSpeed = currentState.playbackSpeed,
+                        dominantColor = currentState.dominantColor,
+                        gradientColor = currentState.gradientColor
                     )
                 } else {
                     _playerState.value = PlayerState.Stopped(
@@ -65,6 +74,8 @@ class PlayerViewModel @Inject constructor(
                         duration = player.duration,
                         currentPosition = currentState.currentPosition,
                         playbackSpeed = currentState.playbackSpeed,
+                        dominantColor = currentState.dominantColor,
+                        gradientColor = currentState.gradientColor
                     )
                 }
             }
@@ -111,9 +122,12 @@ class PlayerViewModel @Inject constructor(
         )
         val currentState = _playerState.value
         viewModelScope.launch {
+            val albumArtResult = getAlbumArtAndColor(music.originalName)
             _playerState.update {
                 (currentState as PlayerState.Playing).copy(
-                    albumArt = getBitMap(music.originalName)
+                    albumArt = albumArtResult?.bitmap,
+                    dominantColor = albumArtResult?.domainColor,
+                    gradientColor = albumArtResult?.gradientColor
                 )
             }
         }
@@ -122,16 +136,6 @@ class PlayerViewModel @Inject constructor(
         player.setMediaItem(mediaItem)
         player.prepare()
         player.play()
-    }
-
-    private suspend fun getBitMap(resourceName: String): Bitmap? {
-        val albumArtByte = getAlbumArtUseCase(resourceName)
-        val bitmap = if (albumArtByte != null) {
-            BitmapFactory.decodeByteArray(albumArtByte, 0, albumArtByte.size)
-        } else {
-            null
-        }
-        return bitmap
     }
 
     fun onPause() {
@@ -158,7 +162,30 @@ class PlayerViewModel @Inject constructor(
         Timber.i("onCleared()")
         player.release()
     }
+
+
+    private suspend fun getAlbumArtAndColor(resourceName: String): AlbumArtResult? {
+        val albumArtByte = getAlbumArtUseCase(resourceName) ?: return null
+
+        return withContext(Dispatchers.Default) {
+            val bitmap = BitmapFactory.decodeByteArray(albumArtByte, 0, albumArtByte.size)
+            val palette = Palette.from(bitmap).generate()
+
+            // 대표 색상은 기존과 같이 어두운 Vibrant 색상으로 선택
+            val dominantColor = palette.darkVibrantSwatch?.rgb?.let { Color(it) }
+                ?: palette.darkMutedSwatch?.rgb?.let { Color(it) }
+                ?: Color.Gray
+
+            // 그라데이션 색상은 Muted 색상 계열로 선택하여 부드러운 조화를 유도
+            val gradientColor = palette.mutedSwatch?.rgb?.let { Color(it) }
+                ?: palette.lightMutedSwatch?.rgb?.let { Color(it) }
+                ?: dominantColor // 마땅한 색이 없으면 대표 색상과 동일하게 설정
+
+            AlbumArtResult(bitmap, dominantColor, gradientColor)
+        }
+    }
 }
+
 
 
 

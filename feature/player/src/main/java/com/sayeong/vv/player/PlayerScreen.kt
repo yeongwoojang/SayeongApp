@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
@@ -88,6 +89,9 @@ private fun PlayerContent(
     var sliderPosition by remember { mutableFloatStateOf(0f) }
     var isUserSeeking by remember { mutableStateOf(false) }
 
+    val dominantColor = state.dominantColor ?: Color.Black
+    val gradientColor = state.gradientColor ?: dominantColor
+
     LaunchedEffect(state.currentPosition) {
         if (!isUserSeeking) {
             sliderPosition = state.currentPosition.toFloat()
@@ -111,7 +115,16 @@ private fun PlayerContent(
     Column(
         modifier = Modifier
             .fillMaxSize() // Column이 전체를 채우도록 변경
-            .background(MaterialTheme.colorScheme.surface) // 배경색 지정
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        dominantColor.copy(alpha = 0.8f), // 위쪽 색상
+                        gradientColor.copy(alpha = 0.6f), // 아래쪽 색상
+                        dominantColor.copy(alpha = 0.8f)
+                    )
+                )
+            )
+
     ) {
         // 1. 앨범 아트 섹션 (화면의 남는 공간을 모두 차지)
         Box(
@@ -128,6 +141,8 @@ private fun PlayerContent(
                     bitmap = bitmap.asImageBitmap(),
                     contentDescription = "${state.musicResource.originalName} 앨범 아트",
                     modifier = Modifier.fillMaxSize()
+                        .padding(12.dp)
+                        .background(color = Color.Transparent, shape = RoundedCornerShape(16.dp))
                 )
             }
         }
