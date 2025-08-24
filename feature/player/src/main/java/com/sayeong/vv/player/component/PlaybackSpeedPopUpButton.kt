@@ -2,6 +2,7 @@ package com.sayeong.vv.player.component
 
 
 import android.view.Gravity
+import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,8 +27,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.state.rememberPlaybackSpeedState
 
+@OptIn(UnstableApi::class)
 @Composable
 internal fun PlaybackSpeedPopUpButton(
     player: Player,
@@ -37,7 +40,6 @@ internal fun PlaybackSpeedPopUpButton(
     val state = rememberPlaybackSpeedState(player)
     var openDialog by remember { mutableStateOf(false) }
     TextButton(onClick = { openDialog = true }, modifier = modifier, enabled = state.isEnabled) {
-        // TODO: look into TextMeasurer to ensure 1.1 and 2.2 occupy the same space
         BasicText("%.1fx".format(state.playbackSpeed))
     }
     if (openDialog) {

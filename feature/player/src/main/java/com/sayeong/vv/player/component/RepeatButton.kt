@@ -9,27 +9,34 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.state.rememberRepeatButtonState
+import com.sayeong.vv.player.R
 
 @OptIn(UnstableApi::class)
 @Composable
 internal fun RepeatButton(player: Player, modifier: Modifier = Modifier) {
     val state = rememberRepeatButtonState(player)
-    val icon = repeatModeIcon(state.repeatModeState)
+    val icon = painterResource(R.drawable.repeat_24px)
+    val tint = if (state.repeatModeState == Player.REPEAT_MODE_OFF) {
+        Color.Black
+    } else {
+        Color.Red
+    }
+
     val contentDescription = repeatModeContentDescription(state.repeatModeState)
     IconButton(onClick = state::onClick, modifier = modifier, enabled = state.isEnabled) {
-        Icon(icon, contentDescription = contentDescription, modifier = modifier)
-    }
-}
-
-private fun repeatModeIcon(repeatMode: @Player.RepeatMode Int): ImageVector {
-    return when (repeatMode) {
-        Player.REPEAT_MODE_OFF -> Icons.Default.Call
-        Player.REPEAT_MODE_ONE -> Icons.Default.Done
-        else -> Icons.Default.Call
+        Icon(
+            icon,
+            contentDescription = contentDescription,
+            modifier = modifier,
+            tint = tint
+        )
     }
 }
 

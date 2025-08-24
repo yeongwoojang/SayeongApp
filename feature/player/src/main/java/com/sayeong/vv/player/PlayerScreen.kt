@@ -1,13 +1,13 @@
 package com.sayeong.vv.player
 
 import androidx.annotation.OptIn
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -23,11 +23,13 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
@@ -35,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
@@ -49,14 +52,6 @@ import java.util.concurrent.TimeUnit
 fun PlayerSection(
     viewModel: PlayerViewModel = hiltViewModel()
 ) {
-    var showControls by remember { mutableStateOf(true) }
-    var sliderPosition by remember { mutableStateOf(0f) }
-
-    //_ 사용자가 Slider를 조작 중인지 추적하는 state
-    var isUserSeeking by remember { mutableStateOf(false) }
-
-    val uiState by viewModel.playerState.collectAsState()
-
     // 1. 변수 이름을 playerState로 명확하게 변경합니다.
     val playerState by viewModel.playerState.collectAsState()
 
@@ -72,7 +67,9 @@ fun PlayerSection(
         // PlayerState가 Playing 또는 Stopped일 때
         is LoadedState -> {
             PlayerContent(
-                viewModel = viewModel,
+                player = viewModel.player,
+                onPause = viewModel::onPause,
+                onSeekTo = viewModel::seekTo,
                 state = state // 현재 상태(Playing 또는 Stopped)를 전달
             )
         }
@@ -80,32 +77,28 @@ fun PlayerSection(
     }
 }
 
-/**
- * 음악이 로드된 상태(재생 또는 정지)일 때의 UI를 담당하는 컴포저블
- */
 @OptIn(UnstableApi::class)
 @Composable
 private fun PlayerContent(
-    viewModel: PlayerViewModel,
-    state: LoadedState // LoadedState 타입으로 받아서 공통 속성에 접근
+    player: Player,
+    onPause: () -> Unit,
+    onSeekTo: (Long) -> Unit,
+    state: LoadedState
 ) {
-    var showControls by remember { mutableStateOf(true) }
-    var sliderPosition by remember { mutableStateOf(0f) }
+    var sliderPosition by remember { mutableFloatStateOf(0f) }
     var isUserSeeking by remember { mutableStateOf(false) }
 
-    // 3. LaunchedEffect의 key를 state의 currentPosition으로 변경합니다.
     LaunchedEffect(state.currentPosition) {
         if (!isUserSeeking) {
             sliderPosition = state.currentPosition.toFloat()
         }
     }
 
-    // 4. Lifecycle 관련 코드는 PlayerContent 내부 또는 PlayerScreen에 있어도 괜찮습니다.
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_PAUSE) {
-                viewModel.onPause()
+                onPause()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -114,111 +107,162 @@ private fun PlayerContent(
         }
     }
 
+    // --- 이 부분을 새로운 Column 구조로 변경합니다 ---
     Column(
-        modifier = Modifier.fillMaxWidth().height(300.dp)
+        modifier = Modifier
+            .fillMaxSize() // Column이 전체를 채우도록 변경
+            .background(MaterialTheme.colorScheme.surface) // 배경색 지정
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            // PlayerSurface는 그대로 둡니다.
+        // 1. 앨범 아트 섹션 (화면의 남는 공간을 모두 차지)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f) // 남는 공간을 모두 차지
+        ) {
             PlayerSurface(
-                viewModel.player,
+                player,
                 surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
-                modifier = Modifier.noRippleClickable { showControls = !showControls },
             )
-            // 5. uiState 대신 전달받은 state의 속성을 사용합니다.
             state.albumArt?.let { bitmap ->
                 Image(
                     bitmap = bitmap.asImageBitmap(),
                     contentDescription = "${state.musicResource.originalName} 앨범 아트",
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxSize()
                 )
             }
+        }
 
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Slider(
-                    value = sliderPosition, // 로컬 상태 사용
-                    onValueChange = { newPosition ->
-                        isUserSeeking = true
-                        sliderPosition = newPosition
-                    },
-                    onValueChangeFinished = {
-                        viewModel.seekTo(sliderPosition.toLong())
-                        isUserSeeking = false
-                    },
-                    // 5. uiState 대신 전달받은 state의 속성을 사용합니다.
-                    valueRange = 0f..state.duration.toFloat().coerceAtLeast(0f),
-                    modifier = Modifier.fillMaxWidth(),
-                    track = { sliderState ->
-                        // sliderState에서 현재 진행률(fraction)을 가져올 수 있습니다.
-                        val progress = sliderState.value / sliderState.valueRange.endInclusive
+        // 2. 음악 정보 및 컨트롤러 섹션
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding() // 하단 네비게이션 바 영역 확보
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // 음악 제목
+            Text(
+                text = state.musicResource.originalName,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            // 아티스트 이름 (예시)
+            Text(
+                text = state.musicResource.artist ?: "Unknown Artist",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp)
+            )
 
-                        // 비활성 트랙 (전체 길이의 회색 막대)
-                        Row(
+            // 플레이어 바 (슬라이더, 시간)
+            PlayerBar(
+                modifier = Modifier.padding(top = 16.dp),
+                sliderPosition = sliderPosition,
+                onValueChange = { newPosition ->
+                    isUserSeeking = true // isUserSeeking 상태 업데이트 추가
+                    sliderPosition = newPosition
+                },
+                onValueChangeFinished = {
+                    onSeekTo(sliderPosition.toLong())
+                    isUserSeeking = false
+                },
+                duration = state.duration
+            )
+
+            // 재생/일시정지, 이전/다음 등 추가 컨트롤
+            ExtraControls(
+                modifier = Modifier.padding(top = 8.dp),
+                player = player,
+            )
+        }
+    }
+}
+
+@Composable
+private fun PlayerBar(
+    modifier: Modifier,
+    sliderPosition: Float,
+    onValueChange: (Float) -> Unit,
+    onValueChangeFinished: () -> Unit,
+    duration: Long
+) {
+    Column(
+        modifier = modifier
+    ) {
+        Slider(
+            value = sliderPosition, // 로컬 상태 사용
+            onValueChange = onValueChange,
+            onValueChangeFinished = onValueChangeFinished,
+            // 5. uiState 대신 전달받은 state의 속성을 사용합니다.
+            valueRange = 0f..duration.toFloat().coerceAtLeast(0f),
+            modifier = Modifier.fillMaxWidth(),
+            track = { sliderState ->
+                // sliderState에서 현재 진행률(fraction)을 가져올 수 있습니다.
+                val progress = sliderState.value / sliderState.valueRange.endInclusive
+
+                // 비활성 트랙 (전체 길이의 회색 막대)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+
+                ) {
+                    Box {
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-
-                        ) {
-                            Box {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(4.dp)
-                                        .background(
-                                            color = MaterialTheme.colorScheme.onSecondary, //_비활성 트랙 색상
-                                            shape = RoundedCornerShape(4.dp)
-                                        )
+                                .height(4.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.onSecondary, //_비활성 트랙 색상
+                                    shape = RoundedCornerShape(4.dp)
                                 )
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth(progress) //_ 진행률만큼 너비를 채움
-                                        .height(4.dp)
-                                        .background(
-                                            color = Color.Red, //_활성 트랙 색상
-                                            shape = RoundedCornerShape(4.dp)
-                                        )
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(progress) //_ 진행률만큼 너비를 채움
+                                .height(4.dp)
+                                .background(
+                                    color = Color.Red, //_활성 트랙 색상
+                                    shape = RoundedCornerShape(4.dp)
                                 )
-                            }
-                        }
-                    },
-                    thumb = {
-                        Row(
-                            modifier = Modifier.padding(top = 2.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .width(12.dp)
-                                    .height(12.dp)
-                                    .background(
-                                        color = Color.Red, // 색상
-                                        shape = CircleShape // 모양
-                                    )
-                            )
-                        }
+                        )
                     }
-                )
+                }
+            },
+            thumb = {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier.padding(top = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // 6. 시간 표시는 드래그 중인 로컬 값(sliderPosition)으로 표시
-                    Text(text = formatDuration(sliderPosition.toLong()))
-                    Text(text = formatDuration(state.duration))
+                    Box(
+                        modifier = Modifier
+                            .width(12.dp)
+                            .height(12.dp)
+                            .background(
+                                color = Color.Red, // 색상
+                                shape = CircleShape // 모양
+                            )
+                    )
                 }
             }
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            // 6. 시간 표시는 드래그 중인 로컬 값(sliderPosition)으로 표시
+            Text(
+                text = formatDuration(sliderPosition.toLong()),
+                style = MaterialTheme.typography.labelSmall
 
-            if (showControls) {
-                ExtraControls(
-                    viewModel.player,
-                    Modifier.fillMaxWidth()
-                        .align(Alignment.BottomCenter)
-                        .background(Color.Gray.copy(alpha = 0.4f))
-                        .navigationBarsPadding(),
-                )
-            }
+
+            )
+            Text(
+                text = formatDuration(duration),
+                style = MaterialTheme.typography.labelSmall
+
+            )
         }
     }
 }

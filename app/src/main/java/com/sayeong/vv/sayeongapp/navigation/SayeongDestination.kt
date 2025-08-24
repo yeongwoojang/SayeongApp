@@ -16,12 +16,12 @@ sealed class SayeongDestination(
     object BOOKMARK: SayeongDestination(
         route = "bookmark",
         label = "Bookmark",
-        icon = com.sayeong.vv.home.R.drawable.bookmark_24px
+        icon = R.drawable.bookmark_24px
 
     )
     object SEARCH: SayeongDestination(
         route = "search",
         label = "Search",
-        icon = com.sayeong.vv.home.R.drawable.search_24px
+        icon = R.drawable.search_24px
     )
 }
