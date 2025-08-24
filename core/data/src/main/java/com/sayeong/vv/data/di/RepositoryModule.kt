@@ -1,7 +1,9 @@
 package com.sayeong.vv.data.di
 
+import com.sayeong.vv.data.impl.AlbumArtRepositoryImpl
 import com.sayeong.vv.data.impl.FileRepositoryImpl
 import com.sayeong.vv.data.impl.TopicRepositoryImpl
+import com.sayeong.vv.domain.AlbumArtRepository
 import com.sayeong.vv.domain.FileRepository
 import com.sayeong.vv.domain.TopicRepository
 import dagger.Binds
@@ -18,4 +20,6 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindGetTopicRepository(repository: TopicRepositoryImpl): TopicRepository
+
+    @Binds abstract fun bindGetAlbumArtRepository(repository: AlbumArtRepositoryImpl): AlbumArtRepository
 }

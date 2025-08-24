@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sayeong.vv.domain.GetAlbumArtUseCase
 import com.sayeong.vv.domain.GetMusicByGenreUseCase
 import com.sayeong.vv.domain.GetTopicsUseCase
 import com.sayeong.vv.home.model.MusicUiModel
@@ -29,7 +30,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getTopicsUseCase: GetTopicsUseCase,
-    private val getMusicByGenreUseCase: GetMusicByGenreUseCase
+    private val getMusicByGenreUseCase: GetMusicByGenreUseCase,
+    private val getAlbumArtUseCase: GetAlbumArtUseCase
 ): ViewModel() {
 
     private val _topicUiState = MutableStateFlow<TopicUiState>(TopicUiState.Loading)
@@ -74,7 +76,7 @@ class HomeViewModel @Inject constructor(
                 }
 
                 val bitmapJobs = newMusicRes.map { music ->
-                    async { music to getBitMap(music) }
+                    async { music to getBitMap(music.originalName) }
                 }
 
                 val newAlbumArtMap = bitmapJobs.awaitAll().toMap()
@@ -158,31 +160,13 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getBitMap(musicResource: MusicResource): Bitmap? {
-        return withContext(Dispatchers.IO) {
-            val url = "http://10.0.2.2:3000/uploads/${musicResource.originalName}"
-            val retriever = MediaMetadataRetriever()
-            try {
-                // URL로부터 데이터를 설정합니다. 두 번째 인자는 헤더 정보입니다.
-                retriever.setDataSource(url, HashMap<String, String>())
-
-                // getEmbeddedPicture()를 통해 이미지 데이터를 byte 배열로 가져옵니다.
-                val artBytes = retriever.embeddedPicture
-
-                if (artBytes != null) {
-                    // byte 배열을 Bitmap으로 변환하여 반환합니다.
-                    val bitmap = BitmapFactory.decodeByteArray(artBytes, 0, artBytes.size)
-                    bitmap
-                } else {
-                    null // 앨범 아트가 없는 경우 null 반환
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null // 에러 발생 시 null 반환
-            } finally {
-                // 리소스 해제는 필수입니다.
-                retriever.release()
-            }
+    private suspend fun getBitMap(resourceName: String): Bitmap? {
+        val albumArtByte = getAlbumArtUseCase(resourceName)
+        val bitmap = if (albumArtByte != null) {
+            BitmapFactory.decodeByteArray(albumArtByte, 0, albumArtByte.size)
+        } else {
+            null
         }
+        return bitmap
     }
 }
