@@ -55,7 +55,7 @@ class HomeViewModel @Inject constructor(
             }.collect { musicResources ->
                 var newMusicRes = emptyList<MusicResource>()
                 val currentState = _musicUiState.value
-                val currentFileUiModels = (currentState as? MusicUiState.Shown)?.files ?: emptyList()
+                val currentFileUiModels = (currentState as? MusicUiState.Shown)?.musics ?: emptyList()
                 val curFileUiModelMap = currentFileUiModels.associateBy { it.musicResource.originalName }
 
                 newMusicRes = musicResources.filter {
@@ -69,7 +69,7 @@ class HomeViewModel @Inject constructor(
 
                 _musicUiState.update {
                     (it as MusicUiState.Shown).copy(
-                        files = initialUiModels
+                        musics = initialUiModels
                     )
                 }
 
@@ -92,7 +92,7 @@ class HomeViewModel @Inject constructor(
 
                 _musicUiState.update {
                     (it as MusicUiState.Shown).copy(
-                        files = finalUiModels
+                        musics = finalUiModels
                     )
                 }
             }
@@ -144,15 +144,15 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun toggleBookMark(fileResource: MusicResource) {
-        Timber.i("toggleBookMark() | fileResource: $fileResource")
+    fun toggleBookMark(musicResource: MusicResource) {
+        Timber.i("toggleBookMark() | musicResource: $musicResource")
         val currentState = _musicUiState.value
         if (currentState is MusicUiState.Shown) {
             val oldBookmarkedMusics = currentState.bookmarkedMusics
-            val newBookMarkedMusics = if (fileResource in oldBookmarkedMusics) {
-                oldBookmarkedMusics - fileResource
+            val newBookMarkedMusics = if (musicResource in oldBookmarkedMusics) {
+                oldBookmarkedMusics - musicResource
             } else {
-                oldBookmarkedMusics + fileResource
+                oldBookmarkedMusics + musicResource
             }
             _musicUiState.update { (it as MusicUiState.Shown).copy(bookmarkedMusics = newBookMarkedMusics) }
         }

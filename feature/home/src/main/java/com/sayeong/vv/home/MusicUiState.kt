@@ -6,7 +6,7 @@ import com.sayeong.vv.model.MusicResource
 sealed interface MusicUiState {
     data class Error(val message: String?): MusicUiState
     data class Shown(
-        val files: List<MusicUiModel> = emptyList(),
+        val musics: List<MusicUiModel> = emptyList(),
         val bookmarkedMusics:Set<MusicResource> = emptySet()
     ): MusicUiState
 

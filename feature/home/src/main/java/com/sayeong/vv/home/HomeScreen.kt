@@ -143,18 +143,18 @@ private fun LazyStaggeredGridScope.musicList(
     onMusicClick: (MusicResource) -> Unit
 ) {
     if (uiState is MusicUiState.Shown) {
-        if (uiState.files.isNotEmpty()) {
-            val fileUiModels = uiState.files
+        if (uiState.musics.isNotEmpty()) {
+            val musicUiModels = uiState.musics
             items(
-                items = fileUiModels,
+                items = musicUiModels,
                 key = { it.id }
-            ) { file ->
+            ) { music ->
                 MusicItem(
-                    isBookmarked = file.musicResource in uiState.bookmarkedMusics,
-                    fileUiModel = file,
+                    isBookmarked = music.musicResource in uiState.bookmarkedMusics,
+                    musicUiModel = music,
                     modifier = Modifier.fillMaxWidth().animateItem(),
-                    onToggleBookMark = { onToggleBookMark(file.musicResource) },
-                    onMusicClick = { onMusicClick(file.musicResource) }
+                    onToggleBookMark = { onToggleBookMark(music.musicResource) },
+                    onMusicClick = { onMusicClick(music.musicResource) }
                 )
             }
         }
@@ -164,7 +164,7 @@ private fun LazyStaggeredGridScope.musicList(
 @Composable
 private fun MusicItem(
     isBookmarked: Boolean,
-    fileUiModel: MusicUiModel,
+    musicUiModel: MusicUiModel,
     modifier: Modifier,
     onToggleBookMark: () -> Unit = {},
     onMusicClick: () -> Unit = {}
@@ -187,14 +187,14 @@ private fun MusicItem(
                 contentAlignment = Alignment.Center
             ) {
                 // 개별 이미지 로딩 스피너
-                if (fileUiModel.isArtLoading) {
+                if (musicUiModel.isArtLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
                 }
                 // 앨범 아트가 있으면 표시
-                fileUiModel.albumArt?.let { bitmap ->
+                musicUiModel.albumArt?.let { bitmap ->
                     Image(
                         bitmap = bitmap.asImageBitmap(),
-                        contentDescription = "${fileUiModel.musicResource.originalName} 앨범 아트",
+                        contentDescription = "${musicUiModel.musicResource.originalName} 앨범 아트",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -206,11 +206,11 @@ private fun MusicItem(
             // 파일 정보 (제목, 아티스트 등)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = fileUiModel.musicResource.originalName,
+                    text = musicUiModel.musicResource.originalName,
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = fileUiModel.musicResource.artist ?: "Unknown Artist",
+                    text = musicUiModel.musicResource.artist ?: "Unknown Artist",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
