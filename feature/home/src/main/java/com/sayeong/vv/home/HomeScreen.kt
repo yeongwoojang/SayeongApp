@@ -69,7 +69,8 @@ fun HomeScreen(
         verticalItemSpacing = 24.dp,
         modifier = Modifier
     ) {
-
+        var buttonText = "Done"
+        var isButtonEnable = false
         item(span = StaggeredGridItemSpan.FullLine) {
             Column {
                 when (val state = topicUiState) {
@@ -100,9 +101,14 @@ fun HomeScreen(
                         TopSectionContent(
                             topics = state.topics,
                             selectedTopics = state.selectedTopics,
+                            isHide = state.isHide,
                             modifier = Modifier.padding(top = 8.dp),
                             onTopicClick = viewModel::selectTopic
                         )
+
+                        buttonText = if (state.isHide) "Refresh" else "Done"
+
+                        isButtonEnable = state.selectedTopics.isNotEmpty()
                     }
                     else -> {}
                 }
@@ -111,22 +117,12 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    val isButtonEnable = ((topicUiState as? TopicUiState.Shown)?.selectedTopics?.isNotEmpty() == true
-                            && (musicUiState as? MusicUiState.Shown)?.files?.isNotEmpty() == true
-                            || topicUiState is TopicUiState.NotShown)
-
                     SayeongButton(
                         modifier = Modifier
                             .fillMaxWidth(),
                         onClick = viewModel::onDoneClick,
                         enable = isButtonEnable
                     ) {
-                        val buttonText = if (topicUiState is TopicUiState.Shown) {
-                            "Done"
-                        } else if (topicUiState is TopicUiState.NotShown){
-                            "Refresh"
-                        } else "Done"
-
                         Text(text = buttonText)
                     }
                 }
@@ -246,10 +242,11 @@ private fun MusicItem(
 private fun TopSectionContent(
     topics: List<TopicResource>,
     selectedTopics: Set<String>,
+    isHide: Boolean,
     modifier: Modifier,
     onTopicClick: (String) -> Unit
 ) {
-    if (topics.isNotEmpty()) {
+    if (topics.isNotEmpty() && !isHide) {
         Text(
             text = stringResource(R.string.feature_home_screen_guidance_title),
             textAlign = TextAlign.Center,
