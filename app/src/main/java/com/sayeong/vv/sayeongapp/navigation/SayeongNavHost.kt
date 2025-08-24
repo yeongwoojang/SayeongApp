@@ -9,7 +9,6 @@ import com.sayeong.vv.home.BookMarkScreen
 import com.sayeong.vv.home.HomeScreen
 import com.sayeong.vv.home.ThirdScreen
 import com.sayeong.vv.model.MusicResource
-import com.sayeong.vv.player.PlayerScreen
 
 @Composable
 fun SayeongNavHost(

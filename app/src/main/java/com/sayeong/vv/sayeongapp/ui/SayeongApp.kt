@@ -23,7 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import com.sayeong.vv.designsystem.component.SayeongBackground
 import com.sayeong.vv.designsystem.component.SayeongGradientBackground
 import com.sayeong.vv.designsystem.theme.LocalGradientColors
-import com.sayeong.vv.player.PlayerScreen
+import com.sayeong.vv.player.PlayerSection
 import com.sayeong.vv.player.PlayerViewModel
 import com.sayeong.vv.sayeongapp.navigation.SayeongDestination
 import com.sayeong.vv.sayeongapp.navigation.SayeongNavHost
@@ -52,7 +52,7 @@ fun SayeongApp(
             BottomSheetScaffold(
                 scaffoldState = scaffoldState,
                 sheetContent = {
-                    PlayerScreen(viewModel = playerViewModel)
+                    PlayerSection(viewModel = playerViewModel)
                 },
                 sheetPeekHeight = 0.dp, //_ 초기에는 시트 미노출
                 containerColor = Color.Transparent,
