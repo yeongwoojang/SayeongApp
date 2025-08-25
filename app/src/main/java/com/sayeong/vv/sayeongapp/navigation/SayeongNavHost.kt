@@ -7,8 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.sayeong.vv.home.BookMarkScreen
 import com.sayeong.vv.home.HomeScreen
-import com.sayeong.vv.home.ThirdScreen
 import com.sayeong.vv.model.MusicResource
+import com.sayeong.vv.search.SearchScreen
 
 @Composable
 fun SayeongNavHost(
@@ -31,7 +31,7 @@ fun SayeongNavHost(
         }
 
         composable(SayeongDestination.SEARCH.route) {
-            ThirdScreen()
+            SearchScreen()
         }
     }
 }

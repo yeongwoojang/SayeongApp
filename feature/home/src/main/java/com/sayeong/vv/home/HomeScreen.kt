@@ -369,11 +369,6 @@ fun TopicButtonPreview() {
 }
 
 @Composable
-fun ThirdScreen() {
-    Text("Third")
-}
-
-@Composable
 fun BookMarkScreen() {
     Text("BookMark")
 }

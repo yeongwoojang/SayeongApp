@@ -40,6 +40,7 @@ dependencies {
     //_ feature 모듈 의존성 추가
     implementation(projects.feature.home)
     implementation(projects.feature.player)
+    implementation(projects.feature.search)
     implementation(projects.core.designsystem)
     implementation(projects.core.data)
 

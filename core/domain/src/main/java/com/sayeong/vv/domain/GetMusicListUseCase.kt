@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetMusicListUseCase @Inject constructor(
-    private val repository: FileRepository
+    private val repository: MusicRepository
 ){
     suspend operator fun invoke(): Flow<List<MusicResource>> {
         return repository.getMusicList()

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.sayeong.vv.player"
+    namespace = "com.sayeong.vv.search"
     compileSdk = 36
 
     defaultConfig {
@@ -36,11 +36,4 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
-    implementation(libs.media3.exoplayer)
-    implementation(libs.media3.ui)
-    implementation(libs.media3.ui.compose)
-    implementation(libs.media3.exoplayer.dash)
-    implementation(libs.media3.exoplayer.hls)
-    implementation(libs.palette.ktx)
 }
