@@ -10,17 +10,27 @@ import com.sayeong.vv.domain.GetMusicByGenreUseCase
 import com.sayeong.vv.domain.GetTopicsUseCase
 import com.sayeong.vv.home.model.MusicUiModel
 import com.sayeong.vv.model.MusicResource
+import com.sayeong.vv.model.TopicResource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -32,17 +42,53 @@ class HomeViewModel @Inject constructor(
     private val getTopicsUseCase: GetTopicsUseCase,
     private val getMusicByGenreUseCase: GetMusicByGenreUseCase,
     private val getAlbumArtUseCase: GetAlbumArtUseCase
-): ViewModel() {
+) : ViewModel() {
+    private val _selectedTopics = MutableStateFlow<Set<String>>(emptySet())
+    private val _isHide = MutableStateFlow<Boolean>(false)
 
-    private val _topicUiState = MutableStateFlow<TopicUiState>(TopicUiState.Loading)
-    val topicUiState = _topicUiState.asStateFlow()
+    val topicUiState: StateFlow<TopicUiState> = combine(
+        flow {
+            delay(3000)
+            emitAll(getTopicsUseCase())
+        },
+        _selectedTopics,
+        _isHide
+    ) { topics, selectedTopics, isHide ->
+        TopicUiState.Shown(
+            topics = topics,
+            selectedTopics = selectedTopics,
+            isHide = isHide
+        )
+    }.onStart<TopicUiState> { emit(TopicUiState.Loading) }
+        .catch { throwable -> emit(TopicUiState.Error(throwable.message)) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = TopicUiState.Loading
+        )
+
 
     private val _musicUiState = MutableStateFlow<MusicUiState>(MusicUiState.Shown())
     val musicUiState = _musicUiState.asStateFlow()
 
+//    private val _bookmarkedMusics = MutableStateFlow<Set<MusicResource>>(emptySet())
+//    val musicUiState = topicUiState.flatMapLatest { topicState ->
+//        if (topicState is TopicUiState.Shown && topicState.selectedTopics.isNotEmpty()) {
+//            getMusicByGenreUseCase(topicState.selectedTopics.toList())
+//                .catch { throwable ->
+//                    _musicUiState.value = MusicUiState.Error(throwable.message)
+//                }
+//        } else {
+//            flowOf(emptyList())
+//        }
+//    }.stateIn(
+//        scope = viewModelScope,
+//        started = SharingStarted.WhileSubscribed(5000),
+//        initialValue = MusicUiState.Shown()
+//    )
+//
 
     init {
-        getTopics()
         viewModelScope.launch {
             @OptIn(ExperimentalCoroutinesApi::class)
             topicUiState.flatMapLatest { topicState ->
@@ -57,8 +103,10 @@ class HomeViewModel @Inject constructor(
             }.collect { musicResources ->
                 var newMusicRes = emptyList<MusicResource>()
                 val currentState = _musicUiState.value
-                val currentFileUiModels = (currentState as? MusicUiState.Shown)?.musics ?: emptyList()
-                val curFileUiModelMap = currentFileUiModels.associateBy { it.musicResource.originalName }
+                val currentFileUiModels =
+                    (currentState as? MusicUiState.Shown)?.musics ?: emptyList()
+                val curFileUiModelMap =
+                    currentFileUiModels.associateBy { it.musicResource.originalName }
 
                 newMusicRes = musicResources.filter {
                     !curFileUiModelMap.containsKey(it.originalName) || curFileUiModelMap[it.originalName]?.albumArt == null
@@ -66,7 +114,8 @@ class HomeViewModel @Inject constructor(
 
                 val initialUiModels = musicResources.map { resource ->
                     val existingUiModel = curFileUiModelMap[resource.originalName]
-                    existingUiModel?.copy(isArtLoading = false) ?: MusicUiModel(musicResource = resource)
+                    existingUiModel?.copy(isArtLoading = false)
+                        ?: MusicUiModel(musicResource = resource)
                 }
 
                 _musicUiState.update {
@@ -101,49 +150,18 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun getTopics() {
-        viewModelScope.launch {
-            getTopicsUseCase()
-                .onStart {
-                    _topicUiState.value = TopicUiState.Loading
-                }
-                .catch { throwable ->
-                    _topicUiState.value = TopicUiState.Error(throwable.message)
-                }
-                .collect { topics ->
-                    if (topics.isNotEmpty()) {
-                        _topicUiState.value = TopicUiState.Shown(topics)
-                    } else {
-                        _topicUiState.value = TopicUiState.Shown()
-                    }
-                }
-        }
-    }
-
     fun selectTopic(topic: String) {
-        val currentState = _topicUiState.value
-        if (currentState is TopicUiState.Shown) {
-            val oldSelectedIds = currentState.selectedTopics
-            val newSelectedIds = if (oldSelectedIds.contains(topic)) {
-                oldSelectedIds - topic
+        _selectedTopics.update { currentState ->
+            if (currentState.contains(topic)) {
+                currentState - topic
             } else {
-                oldSelectedIds + topic
+                currentState + topic
             }
-
-            _topicUiState.update { currentState.copy(selectedTopics = newSelectedIds) }
-
         }
     }
 
     fun onDoneClick() {
-        if (_topicUiState.value is TopicUiState.Shown) {
-            val currentState = _topicUiState.value as TopicUiState.Shown
-            _topicUiState.value = TopicUiState.Shown(
-                topics = currentState.topics,
-                selectedTopics = currentState.selectedTopics,
-                isHide = !currentState.isHide
-            )
-        }
+        _isHide.update { !it }
     }
 
     fun toggleBookMark(musicResource: MusicResource) {
