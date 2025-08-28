@@ -7,7 +7,7 @@ import javax.inject.Inject
 class SearchMusicUseCase @Inject constructor(
     private val musicRepository: MusicRepository
 ) {
-    suspend operator fun invoke(query: String): Flow<List<MusicResource>> {
+    operator fun invoke(query: String): Flow<List<MusicResource>> {
         return musicRepository.getMusicBySearch(query)
     }
 }

@@ -12,15 +12,15 @@ import javax.inject.Inject
 class MusicRepositoryImpl @Inject constructor(
     private val apiService: SayeongApiService
 ): MusicRepository {
-    override suspend fun getMusicList(): Flow<List<MusicResource>> = flow {
+    override fun getMusicList(): Flow<List<MusicResource>> = flow {
         emit(apiService.getMusicList().map { it.toDomainData() })
     }
 
-    override suspend fun getMusicListByGenre(genres: List<String>): Flow<List<MusicResource>> = flow {
+    override fun getMusicListByGenre(genres: List<String>): Flow<List<MusicResource>> = flow {
         emit(apiService.getMusicListByGenre(NetworkFileRequest(genres)).map { it.toDomainData() })
     }
 
-    override suspend fun getMusicBySearch(query: String): Flow<List<MusicResource>> = flow {
+    override fun getMusicBySearch(query: String): Flow<List<MusicResource>> = flow {
         emit(apiService.searchMusic(query).map { it.toDomainData() })
     }
 }
