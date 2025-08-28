@@ -1,4 +1,4 @@
-package com.sayeong.vv.home.model
+package com.sayeong.vv.ui
 
 import android.graphics.Bitmap
 import com.sayeong.vv.model.MusicResource

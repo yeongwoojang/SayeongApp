@@ -7,8 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.sayeong.vv.domain.GetAlbumArtUseCase
 import com.sayeong.vv.domain.GetMusicByGenreUseCase
 import com.sayeong.vv.domain.GetTopicsUseCase
-import com.sayeong.vv.home.model.MusicUiModel
 import com.sayeong.vv.model.MusicResource
+import com.sayeong.vv.ui.MusicUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async

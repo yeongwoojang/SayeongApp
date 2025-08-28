@@ -49,9 +49,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sayeong.vv.designsystem.component.DynamicAsyncImage
 import com.sayeong.vv.designsystem.component.SayeongButton
-import com.sayeong.vv.home.model.MusicUiModel
 import com.sayeong.vv.model.MusicResource
 import com.sayeong.vv.model.TopicResource
+import com.sayeong.vv.ui.MusicUiModel
 
 @Composable
 fun HomeScreen(
