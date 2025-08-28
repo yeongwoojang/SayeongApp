@@ -37,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun SearchScreen(
+    onBackClick: () -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
@@ -44,7 +45,7 @@ fun SearchScreen(
         searchQuery = searchQuery,
         onSearchQueryChanged = { searchQuery = it },
         onSearchTriggered = viewModel::search,
-        onBackClick = { /* 뒤로가기 로직 구현 */ }
+        onBackClick = onBackClick
     )
 
 }

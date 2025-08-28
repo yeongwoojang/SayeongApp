@@ -28,6 +28,8 @@ androidxHiltNavigationCompose = "1.2.0"
 androidxComposeMaterial3Adaptive = "1.1.0-rc01"
 coil = "2.7.0"
 palette = "1.0.0"
+kotlinxSerializationJson = "1.8.0"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -48,6 +50,7 @@ androidx-compose-material3-adaptive = { group = "androidx.compose.material3.adap
 androidx-compose-material3-adaptive-layout = { group = "androidx.compose.material3.adaptive", name = "adaptive-layout", version.ref = "androidxComposeMaterial3Adaptive" }
 androidx-compose-material3-adaptive-navigation = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation", version.ref = "androidxComposeMaterial3Adaptive" }
 androidx-compose-material3-navigationSuite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 
 
 

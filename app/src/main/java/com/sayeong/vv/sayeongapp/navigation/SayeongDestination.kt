@@ -9,18 +9,18 @@ sealed class SayeongDestination(
     @DrawableRes val icon: Int
 ){
     object HOME: SayeongDestination(
-        route = "home",
+        route = "HOME",
         label = "Home",
         icon = R.drawable.home_24px
     )
     object BOOKMARK: SayeongDestination(
-        route = "bookmark",
+        route = "BOOKMARK",
         label = "Bookmark",
         icon = R.drawable.bookmark_24px
 
     )
     object SEARCH: SayeongDestination(
-        route = "search",
+        route = "SEARCH",
         label = "Search",
         icon = R.drawable.search_24px
     )

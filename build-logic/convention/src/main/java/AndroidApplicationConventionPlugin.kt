@@ -13,6 +13,7 @@ class AndroidApplicationConventionPlugin: Plugin<Project> {
         with(target) {
             apply(plugin = "com.android.application")
             apply(plugin = "org.jetbrains.kotlin.android")
+            apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
             //_ 해당 부분은 build.gradle.kt에서 android {...} 블록과 의미가 같다.
             //_ targetSdk는 ApplicationExtension만 접근 할 수 있으므로 configureKotlinAndroid에서 설정하지 않고 아래의 코드에서 설정한다.
@@ -25,6 +26,7 @@ class AndroidApplicationConventionPlugin: Plugin<Project> {
 
                 dependencies {
                     "implementation"(libs.findLibrary("timber").get())
+                    "implementation"(libs.findLibrary("kotlinx.serialization.json").get())
                 }
             }
         }

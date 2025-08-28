@@ -9,6 +9,7 @@ import com.sayeong.vv.home.BookMarkScreen
 import com.sayeong.vv.home.HomeScreen
 import com.sayeong.vv.model.MusicResource
 import com.sayeong.vv.search.SearchScreen
+import com.sayeong.vv.search.navigation.searchScreen
 
 @Composable
 fun SayeongNavHost(
@@ -30,8 +31,11 @@ fun SayeongNavHost(
             BookMarkScreen()
         }
 
-        composable(SayeongDestination.SEARCH.route) {
-            SearchScreen()
-        }
+        searchScreen(
+            onBackClick = navController::popBackStack
+        )
+//        composable(SayeongDestination.SEARCH.route) {
+//            SearchScreen()
+//        }
     }
 }

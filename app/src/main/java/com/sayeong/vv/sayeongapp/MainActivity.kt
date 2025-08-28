@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.sayeong.vv.home.HomeScreen
 import com.sayeong.vv.designsystem.theme.SayeongAppTheme
 import com.sayeong.vv.sayeongapp.ui.SayeongApp
+import com.sayeong.vv.sayeongapp.ui.rememberSayeongAppState
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
 
@@ -34,7 +35,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             SayeongAppTheme {
-                SayeongApp()
+                val appState = rememberSayeongAppState()
+                SayeongApp(
+                    appState = appState
+                )
             }
         }
     }

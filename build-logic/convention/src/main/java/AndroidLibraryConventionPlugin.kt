@@ -11,6 +11,7 @@ class AndroidLibraryConventionPlugin: Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             pluginManager.apply("com.android.library")
+            pluginManager.apply("org.jetbrains.kotlin.plugin.serialization")
 
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
@@ -19,6 +20,7 @@ class AndroidLibraryConventionPlugin: Plugin<Project> {
 
             dependencies {
                 "implementation"(libs.findLibrary("timber").get())
+                "implementation"(libs.findLibrary("kotlinx.serialization.json").get())
             }
         }
     }
