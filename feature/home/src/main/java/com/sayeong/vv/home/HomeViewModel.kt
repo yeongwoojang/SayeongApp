@@ -9,6 +9,7 @@ import com.sayeong.vv.domain.GetMusicByGenreUseCase
 import com.sayeong.vv.domain.GetTopicsUseCase
 import com.sayeong.vv.model.MusicResource
 import com.sayeong.vv.ui.MusicUiModel
+import com.sayeong.vv.ui.utils.toBitmap
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -88,7 +89,7 @@ class HomeViewModel @Inject constructor(
             } else {
                 val map = withContext(Dispatchers.IO) {
                     musicResources.map {
-                        async { it.originalName to getBitMap(it.originalName) }
+                        async { it.originalName to getAlbumArtUseCase(it.originalName).toBitmap() }
                     }.awaitAll().toMap()
                 }
 
@@ -153,15 +154,5 @@ class HomeViewModel @Inject constructor(
                 it + musicResource
             }
         }
-    }
-
-    private suspend fun getBitMap(resourceName: String): Bitmap? {
-        val albumArtByte = getAlbumArtUseCase(resourceName)
-        val bitmap = if (albumArtByte != null) {
-            BitmapFactory.decodeByteArray(albumArtByte, 0, albumArtByte.size)
-        } else {
-            null
-        }
-        return bitmap
     }
 }

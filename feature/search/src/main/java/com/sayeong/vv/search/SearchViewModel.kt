@@ -8,6 +8,7 @@ import com.sayeong.vv.domain.GetAlbumArtUseCase
 import com.sayeong.vv.domain.SearchMusicUseCase
 import com.sayeong.vv.model.MusicResource
 import com.sayeong.vv.ui.MusicUiModel
+import com.sayeong.vv.ui.utils.toBitmap
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -70,7 +71,7 @@ class SearchViewModel @Inject constructor(
             } else {
                 val newAlbumMap = withContext(Dispatchers.IO) {
                     musicResources.map {
-                        async { it.originalName to getBitMap(it.originalName) }
+                        async { it.originalName to getAlbumArtUseCase(it.originalName).toBitmap() }
                     }.awaitAll().toMap()
                 }
 
@@ -111,7 +112,7 @@ class SearchViewModel @Inject constructor(
 
     fun toggleBookMark(musicResource: MusicResource) {
         Timber.i("toggleBookMark() | musicResource: $musicResource")
-
+        //TODO Room에 데이터 저장 필요
         bookmarkedMusics.update {
             if (musicResource in it) {
                 it - musicResource
@@ -119,15 +120,5 @@ class SearchViewModel @Inject constructor(
                 it + musicResource
             }
         }
-    }
-
-    private suspend fun getBitMap(resourceName: String): Bitmap? {
-        val albumArtByte = getAlbumArtUseCase(resourceName)
-        val bitmap = if (albumArtByte != null) {
-            BitmapFactory.decodeByteArray(albumArtByte, 0, albumArtByte.size)
-        } else {
-            null
-        }
-        return bitmap
     }
 }
