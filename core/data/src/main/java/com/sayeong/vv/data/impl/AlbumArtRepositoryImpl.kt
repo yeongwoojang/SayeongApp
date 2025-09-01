@@ -6,6 +6,7 @@ import androidx.collection.LruCache
 import com.sayeong.vv.domain.AlbumArtRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
 
 class AlbumArtRepositoryImpl @Inject constructor(

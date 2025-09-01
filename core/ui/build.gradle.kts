@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.sayeong.android.library)
+    alias(libs.plugins.sayeong.android.compose)
 }
 
 android {

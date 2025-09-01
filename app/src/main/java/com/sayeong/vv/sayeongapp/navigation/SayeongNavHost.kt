@@ -32,7 +32,8 @@ fun SayeongNavHost(
         }
 
         searchScreen(
-            onBackClick = navController::popBackStack
+            onBackClick = navController::popBackStack,
+            onMusicClick = onMusicClick
         )
 //        composable(SayeongDestination.SEARCH.route) {
 //            SearchScreen()

@@ -4,6 +4,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import com.sayeong.vv.model.MusicResource
 import com.sayeong.vv.search.SearchScreen
 import kotlinx.serialization.Serializable
 
@@ -14,10 +15,12 @@ fun NavController.navigateToSearch(navOptions: NavOptions? = null) =
 
 fun NavGraphBuilder.searchScreen(
     onBackClick: () -> Unit,
+    onMusicClick: (MusicResource) -> Unit
 ) {
     composable(searchRoute) {
         SearchScreen(
-            onBackClick = onBackClick
+            onBackClick = onBackClick,
+            onMusicClick = onMusicClick
         )
 
     }

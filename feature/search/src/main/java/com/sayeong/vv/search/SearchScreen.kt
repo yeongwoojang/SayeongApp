@@ -1,6 +1,7 @@
 package com.sayeong.vv.search
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -40,38 +41,48 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sayeong.vv.model.MusicResource
+import com.sayeong.vv.ui.MusicUiModel
+import com.sayeong.vv.ui.components.MusicItem
 
 @Composable
 fun SearchScreen(
     onBackClick: () -> Unit,
+    onMusicClick: (MusicResource) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
     val searchUiState by viewModel.searchUiState.collectAsStateWithLifecycle()
-    SearchToolbar(
-        searchQuery = searchQuery,
-        onSearchQueryChanged = { searchQuery = it },
-        onSearchTriggered = viewModel::search,
-        onBackClick = onBackClick
-    )
+    Column {
+        SearchToolbar(
+            searchQuery = searchQuery,
+            onSearchQueryChanged = { searchQuery = it },
+            onSearchTriggered = viewModel::search,
+            onBackClick = onBackClick
+        )
 
-    when (val state = searchUiState) {
-        is SearchUiState.Loading -> {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+        when (val state = searchUiState) {
+            is SearchUiState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
-        }
 
-        is SearchUiState.Shown -> {
-            Text(
-                text = "${state.musicResources}"
-            )
-        }
-        is SearchUiState.Error -> {
+            is SearchUiState.Shown -> {
+                SearchContent(
+                    modifier = Modifier,
+                    contents = state.musicResources,
+                    bookmarkedMusics = state.bookmarkedMusics,
+                    onToggleBookMark = viewModel::toggleBookMark,
+                    onMusicClick = onMusicClick
+                )
+            }
+            is SearchUiState.Error -> {
 
+            }
         }
     }
 
@@ -180,5 +191,31 @@ fun SearchTextField(
     )
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
+    }
+}
+
+@Composable
+private fun SearchContent(
+    modifier: Modifier,
+    contents: List<MusicUiModel>,
+    bookmarkedMusics: Set<MusicResource>,
+    onToggleBookMark: (MusicResource) -> Unit,
+    onMusicClick: (MusicResource) -> Unit
+) {
+    LazyColumn(
+        modifier = modifier
+    ) {
+        items(
+            items = contents,
+            key = { it.id }
+        ) { music ->
+            MusicItem(
+                isBookmarked = music.musicResource in bookmarkedMusics,
+                musicUiModel = music,
+                modifier = Modifier,
+                onToggleBookMark = onToggleBookMark,
+                onMusicClick = { onMusicClick(music.musicResource) }
+            )
+        }
     }
 }
