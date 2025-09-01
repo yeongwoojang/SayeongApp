@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -60,13 +61,21 @@ class SearchViewModel @Inject constructor(
     )
 
     private val albumArtCache: StateFlow<Map<String, Bitmap?>> =
-        musicResources.flatMapLatest { musicResources ->
-            val jobs = withContext(Dispatchers.IO) {
-                musicResources.map {
-                    async { it.originalName to getBitMap(it.originalName) }
-                }
+        musicResources.scan(emptyMap<String, Bitmap?>()) { cachedMap, musicResources ->
+            val fetchToAlbumArts = musicResources.filter { musicResource ->
+                !cachedMap.containsKey(musicResource.originalName)
             }
-            flowOf(jobs.awaitAll().toMap())
+            if (fetchToAlbumArts.isEmpty()) {
+                cachedMap
+            } else {
+                val newAlbumMap = withContext(Dispatchers.IO) {
+                    musicResources.map {
+                        async { it.originalName to getBitMap(it.originalName) }
+                    }.awaitAll().toMap()
+                }
+
+                cachedMap + newAlbumMap
+            }
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),

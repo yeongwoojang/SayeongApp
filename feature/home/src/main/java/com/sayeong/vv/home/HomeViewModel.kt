@@ -87,10 +87,9 @@ class HomeViewModel @Inject constructor(
                 cachedMap
             } else {
                 val map = withContext(Dispatchers.IO) {
-                    val jobs = musicResources.map {
+                    musicResources.map {
                         async { it.originalName to getBitMap(it.originalName) }
-                    }
-                    jobs.awaitAll().toMap()
+                    }.awaitAll().toMap()
                 }
 
                 cachedMap + map
