@@ -1,16 +1,17 @@
 package com.sayeong.vv.search
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sayeong.vv.domain.GetAlbumArtUseCase
+import com.sayeong.vv.domain.GetBookmarkedMusicUseCase
+import com.sayeong.vv.domain.InsertBookmarkedUseCase
+import com.sayeong.vv.domain.RemoveBookmarkedUseCase
 import com.sayeong.vv.domain.SearchMusicUseCase
 import com.sayeong.vv.model.MusicResource
 import com.sayeong.vv.ui.MusicUiModel
 import com.sayeong.vv.ui.utils.toBitmap
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -21,12 +22,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
@@ -39,15 +37,24 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val searchMusicUseCase: SearchMusicUseCase,
-    private val getAlbumArtUseCase: GetAlbumArtUseCase
+    private val getAlbumArtUseCase: GetAlbumArtUseCase,
+    private val getBookmarkedMusicUseCase: GetBookmarkedMusicUseCase,
+    private val insertBookmarkedUseCase: InsertBookmarkedUseCase,
+    private val removeBookmarkedUseCase: RemoveBookmarkedUseCase,
 ) : ViewModel() {
 
-    private val bookmarkedMusics = MutableStateFlow<Set<MusicResource>>(emptySet())
+    private val bookmarkedMusics: StateFlow<Set<MusicResource>> = getBookmarkedMusicUseCase().map {
+        it.toSet()
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptySet()
+    )
 
     private val _query = MutableStateFlow("")
-    val query = _query.asStateFlow()
+    private val query = _query.asStateFlow()
 
-    private val musicResources: SharedFlow<List<MusicResource>> = query.flatMapLatest { queryText ->
+    private val musicResources: StateFlow<List<MusicResource>> = query.flatMapLatest { queryText ->
         if (queryText.isNotEmpty()) {
             searchMusicUseCase(queryText)
         } else {
@@ -55,10 +62,10 @@ class SearchViewModel @Inject constructor(
         }
     }.catch {
         emit(emptyList())
-    }.shareIn(
+    }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
-        replay = 1
+        initialValue = emptyList()
     )
 
     private val albumArtCache: StateFlow<Map<String, Bitmap?>> =
@@ -112,12 +119,11 @@ class SearchViewModel @Inject constructor(
 
     fun toggleBookMark(musicResource: MusicResource) {
         Timber.i("toggleBookMark() | musicResource: $musicResource")
-        //TODO Room에 데이터 저장 필요
-        bookmarkedMusics.update {
-            if (musicResource in it) {
-                it - musicResource
+        viewModelScope.launch {
+            if (musicResource in bookmarkedMusics.value) {
+                removeBookmarkedUseCase(musicResource)
             } else {
-                it + musicResource
+                insertBookmarkedUseCase(musicResource)
             }
         }
     }

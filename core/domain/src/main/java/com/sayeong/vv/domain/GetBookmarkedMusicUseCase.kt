@@ -4,10 +4,10 @@ import com.sayeong.vv.model.MusicResource
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetMusicListUseCase @Inject constructor(
-    private val repository: MusicRepository
-){
+class GetBookmarkedMusicUseCase @Inject constructor(
+    private val musicRepository: MusicRepository
+) {
     operator fun invoke(): Flow<List<MusicResource>> {
-        return repository.getMusicList()
+        return musicRepository.getBookmarkedMusic()
     }
 }

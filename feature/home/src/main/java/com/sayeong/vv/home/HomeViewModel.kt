@@ -4,8 +4,11 @@ import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sayeong.vv.domain.GetAlbumArtUseCase
+import com.sayeong.vv.domain.GetBookmarkedMusicUseCase
 import com.sayeong.vv.domain.GetMusicByGenreUseCase
 import com.sayeong.vv.domain.GetTopicsUseCase
+import com.sayeong.vv.domain.InsertBookmarkedUseCase
+import com.sayeong.vv.domain.RemoveBookmarkedUseCase
 import com.sayeong.vv.model.MusicResource
 import com.sayeong.vv.ui.MusicUiModel
 import com.sayeong.vv.ui.utils.toBitmap
@@ -23,11 +26,13 @@ import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
@@ -36,7 +41,10 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val getTopicsUseCase: GetTopicsUseCase,
     private val getMusicByGenreUseCase: GetMusicByGenreUseCase,
-    private val getAlbumArtUseCase: GetAlbumArtUseCase
+    private val getAlbumArtUseCase: GetAlbumArtUseCase,
+    private val getBookmarkedMusicUseCase: GetBookmarkedMusicUseCase,
+    private val insertBookmarkedUseCase: InsertBookmarkedUseCase,
+    private val removeBookmarkedUseCase: RemoveBookmarkedUseCase,
 ) : ViewModel() {
 
     private val _selectedTopics = MutableStateFlow<Set<String>>(emptySet())
@@ -62,7 +70,13 @@ class HomeViewModel @Inject constructor(
             initialValue = TopicUiState.Loading
         )
 
-    private val bookmarkedMusics = MutableStateFlow<Set<MusicResource>>(emptySet())
+    private val bookmarkedMusics: StateFlow<Set<MusicResource>> = getBookmarkedMusicUseCase().map {
+        it.toSet()
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptySet()
+    )
 
     private val musicResourcesFlow: Flow<List<MusicResource>> =
         topicUiState.flatMapLatest { topicState ->
@@ -146,11 +160,11 @@ class HomeViewModel @Inject constructor(
     fun toggleBookMark(musicResource: MusicResource) {
         Timber.i("toggleBookMark() | musicResource: $musicResource")
 
-        bookmarkedMusics.update {
-            if (musicResource in it) {
-                it - musicResource
+        viewModelScope.launch {
+            if (musicResource in bookmarkedMusics.value) {
+                removeBookmarkedUseCase(musicResource)
             } else {
-                it + musicResource
+                insertBookmarkedUseCase(musicResource)
             }
         }
     }

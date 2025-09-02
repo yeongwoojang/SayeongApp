@@ -36,6 +36,7 @@ dependencies {
     api(projects.core.domain)
     api(projects.core.model)
     api(projects.core.network)
+    api(projects.core.database)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
