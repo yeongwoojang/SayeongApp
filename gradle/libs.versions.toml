@@ -29,6 +29,7 @@ androidxComposeMaterial3Adaptive = "1.1.0-rc01"
 coil = "2.7.0"
 palette = "1.0.0"
 kotlinxSerializationJson = "1.8.0"
+room = "2.7.2"
 
 
 [libraries]
@@ -99,6 +100,11 @@ coil-kt-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
 
 palette-ktx = {group ="androidx.palette", name ="palette-ktx", version.ref = "palette"}
 
+#_ room
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -109,6 +115,7 @@ google-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" } # <-- 이 라인 추가
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+room = { id = "androidx.room", version.ref = "room" }
 
 
 sayeong-android-application = { id = "sayeong.android.application" }
@@ -116,6 +123,7 @@ sayeong-android-library = { id = "sayeong.android.library" }
 sayeong-android-hilt = { id = "sayeong.android.hilt" }
 sayeong-android-compose = { id = "sayeong.android.compose" }
 sayeong-jvm-library = { id = "sayeong.jvm.library", version = "unspecified" }
+sayeong-android-room = { id = "sayeong.android.room" }
 
 
 

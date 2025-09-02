@@ -31,6 +31,7 @@ dependencies {
     compileOnly(libs.compose.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.android.tools.common)
+    compileOnly(libs.room.gradlePlugin)
     implementation(libs.truth)
 }
 
@@ -55,6 +56,10 @@ gradlePlugin {
         register("jvmLibrary") {
             id = libs.plugins.sayeong.jvm.library.get().pluginId
             implementationClass = "JvmLibraryConventionPlugin"
+        }
+        register("androidRoom") {
+            id = libs.plugins.sayeong.android.room.get().pluginId
+            implementationClass = "AndroidRoomConventionPlugin"
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.sayeong.vv.home
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sayeong.vv.domain.GetAlbumArtUseCase
