@@ -9,7 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import com.sayeong.vv.sayeongapp.navigation.SayeongDestination
+import com.sayeong.vv.ui.SayeongDestination
 
 @Composable
 fun rememberSayeongAppState(

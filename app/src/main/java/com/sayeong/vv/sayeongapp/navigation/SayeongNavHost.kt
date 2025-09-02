@@ -5,10 +5,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.sayeong.vv.home.BookMarkScreen
+import com.sayeong.vv.bookmark.navigation.bookmarkScreen
 import com.sayeong.vv.home.HomeScreen
+import com.sayeong.vv.home.navigation.homeScreen
 import com.sayeong.vv.model.MusicResource
-import com.sayeong.vv.search.SearchScreen
 import com.sayeong.vv.search.navigation.searchScreen
 
 @Composable
@@ -23,20 +23,17 @@ fun SayeongNavHost(
         startDestination = "home",
         modifier = modifier
     ) {
-        composable(SayeongDestination.HOME.route) {
-            HomeScreen(onMusicClick = onMusicClick)
-        }
-
-        composable(SayeongDestination.BOOKMARK.route) {
-            BookMarkScreen()
-        }
+        homeScreen(
+            onMusicClick = onMusicClick
+        )
 
         searchScreen(
             onBackClick = navController::popBackStack,
             onMusicClick = onMusicClick
         )
-//        composable(SayeongDestination.SEARCH.route) {
-//            SearchScreen()
-//        }
+
+        bookmarkScreen(
+            onMusicClick = onMusicClick
+        )
     }
 }

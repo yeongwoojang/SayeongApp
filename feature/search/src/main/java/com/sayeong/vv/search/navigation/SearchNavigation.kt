@@ -6,18 +6,18 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.sayeong.vv.model.MusicResource
 import com.sayeong.vv.search.SearchScreen
+import com.sayeong.vv.ui.SayeongDestination
 import kotlinx.serialization.Serializable
 
-private const val searchRoute = "Search"
 
 fun NavController.navigateToSearch(navOptions: NavOptions? = null) =
-    navigate(searchRoute, navOptions)
+    navigate(SayeongDestination.SEARCH.route, navOptions)
 
 fun NavGraphBuilder.searchScreen(
     onBackClick: () -> Unit,
     onMusicClick: (MusicResource) -> Unit
 ) {
-    composable(searchRoute) {
+    composable(SayeongDestination.SEARCH.route) {
         SearchScreen(
             onBackClick = onBackClick,
             onMusicClick = onMusicClick

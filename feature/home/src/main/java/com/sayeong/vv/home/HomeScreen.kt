@@ -368,8 +368,3 @@ fun TopicButtonPreview() {
         {}
         )
 }
-
-@Composable
-fun BookMarkScreen() {
-    Text("BookMark")
-}

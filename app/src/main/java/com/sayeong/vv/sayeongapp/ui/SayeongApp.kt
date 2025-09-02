@@ -36,7 +36,6 @@ import com.sayeong.vv.designsystem.theme.LocalGradientColors
 import com.sayeong.vv.player.PlayerSection
 import com.sayeong.vv.player.PlayerViewModel
 import com.sayeong.vv.sayeongapp.R
-import com.sayeong.vv.sayeongapp.navigation.SayeongDestination
 import com.sayeong.vv.sayeongapp.navigation.SayeongNavHost
 import kotlinx.coroutines.launch
 
@@ -86,7 +85,8 @@ fun SayeongApp(
                                         appState.navigateToSearch()
                                     }) {
                                         Icon(
-                                            painter = painterResource(id = R.drawable.search_24px),
+                                            //TODO 이미지 한곳에서 모아서 쓸 수 있도록 수정 필요
+                                            painter = painterResource(id = com.sayeong.vv.ui.R.drawable.search_24px),
                                             contentDescription = "Search"
                                         )
                                     }
@@ -94,7 +94,8 @@ fun SayeongApp(
                                 actions = {
                                     IconButton(onClick = {}) {
                                         Icon(
-                                            painter = painterResource(id = R.drawable.bookmark_24px),
+                                            //TODO 셋팅 이미지 노출 필요 (테마 설정 기능 추가 예정)
+                                            painter = painterResource(id = com.sayeong.vv.ui.R.drawable.bookmark_24px),
                                             contentDescription = "Settings"
                                         )
                                     }

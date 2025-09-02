@@ -1,5 +1,6 @@
 package com.sayeong.vv.search
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -73,7 +74,9 @@ fun SearchScreen(
 
             is SearchUiState.Shown -> {
                 SearchContent(
-                    modifier = Modifier,
+                    modifier = Modifier
+                        .padding(top = 24.dp)
+                        .padding(horizontal = 16.dp),
                     contents = state.musicResources,
                     bookmarkedMusics = state.bookmarkedMusics,
                     onToggleBookMark = viewModel::toggleBookMark,
@@ -203,7 +206,8 @@ private fun SearchContent(
     onMusicClick: (MusicResource) -> Unit
 ) {
     LazyColumn(
-        modifier = modifier
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         items(
             items = contents,

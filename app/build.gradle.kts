@@ -41,6 +41,7 @@ dependencies {
     implementation(projects.feature.home)
     implementation(projects.feature.player)
     implementation(projects.feature.search)
+    implementation(projects.feature.bookmark)
     implementation(projects.core.designsystem)
     implementation(projects.core.data)
     implementation(projects.core.ui)
