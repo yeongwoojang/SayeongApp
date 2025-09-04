@@ -24,7 +24,7 @@ sealed interface PlayerState {
         override val currentPosition: Long = 0L,
         override val playbackSpeed: Float = 0f,
         override val dominantColor: Color? = null,
-        override val gradientColor: Color? = null
+        override val gradientColor: Color? = null,
     ): LoadedState, PlayerState
 
     data class Playing(
@@ -34,6 +34,6 @@ sealed interface PlayerState {
         override val currentPosition: Long = 0L,
         override val playbackSpeed: Float = 0f,
         override val dominantColor: Color? = null,
-        override val gradientColor: Color? = null
+        override val gradientColor: Color? = null,
     ) : PlayerState, LoadedState // LoadedState 인터페이스 구현
 }

@@ -116,6 +116,7 @@ class PlayerViewModel @Inject constructor(
             }
         }
 
+        Timber.i("TEST_LOG | playMusic")
         _playerState.value = PlayerState.Playing(
             musicResource = music,
             currentPosition = 0L,
@@ -185,25 +186,3 @@ class PlayerViewModel @Inject constructor(
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

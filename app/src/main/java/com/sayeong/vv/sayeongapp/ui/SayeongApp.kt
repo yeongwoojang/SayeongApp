@@ -1,6 +1,5 @@
 package com.sayeong.vv.sayeongapp.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetScaffold
@@ -10,32 +9,34 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.sayeong.vv.designsystem.component.SayeongBackground
 import com.sayeong.vv.designsystem.component.SayeongGradientBackground
 import com.sayeong.vv.designsystem.theme.LocalGradientColors
-import com.sayeong.vv.player.PlayerSection
+import com.sayeong.vv.player.PlayerScreen
 import com.sayeong.vv.player.PlayerViewModel
-import com.sayeong.vv.sayeongapp.R
+import com.sayeong.vv.player.model.PlayerState
 import com.sayeong.vv.sayeongapp.navigation.SayeongNavHost
 import kotlinx.coroutines.launch
 
@@ -48,10 +49,33 @@ fun SayeongApp(
     val scaffoldState = rememberBottomSheetScaffoldState()
     val scope = rememberCoroutineScope()
     val playerViewModel: PlayerViewModel = hiltViewModel()
+    val playerState by playerViewModel.playerState.collectAsStateWithLifecycle()
 
     val currentDestination = appState.currentDestination
     val currentTopLevelDestination = appState.topLevelDestinations.find { destination ->
         currentDestination?.hierarchy?.any { it.route == destination.route } == true
+    }
+
+    // 플레이어가 한 번이라도 활성화되었는지 기억하는 상태
+    var isPlayerLaunched by rememberSaveable { mutableStateOf(false) }
+    if (playerState !is PlayerState.Idle) {
+        isPlayerLaunched = true
+    }
+
+    // isPlayerLaunched 상태에 따라 peekHeight를 동적으로 결정
+    val sheetPeekHeight = if (isPlayerLaunched) 80.dp else 0.dp
+
+
+    LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
+        when(scaffoldState.bottomSheetState.currentValue) {
+            SheetValue.Expanded -> {
+
+            }
+            SheetValue.PartiallyExpanded -> {
+
+            }
+            else -> {}
+        }
     }
 
     SayeongBackground(modifier = Modifier) {
@@ -59,10 +83,20 @@ fun SayeongApp(
             BottomSheetScaffold(
                 scaffoldState = scaffoldState,
                 sheetContent = {
-                    PlayerSection(viewModel = playerViewModel)
+                    PlayerScreen(
+                        viewModel = playerViewModel,
+                        targetSheetState = scaffoldState.bottomSheetState.targetValue,
+                        onExpand = {
+                            scope.launch {
+                                scaffoldState.bottomSheetState.expand()
+                            }
+                        }
+                    )
                 },
-                sheetPeekHeight = 0.dp, //_ 초기에는 시트 미노출
+                sheetPeekHeight = sheetPeekHeight,
                 containerColor = Color.Transparent,
+                sheetShape = RectangleShape,
+                sheetDragHandle = {}
             ) { innerPadding ->
                 Scaffold(
                     containerColor = Color.Transparent,
