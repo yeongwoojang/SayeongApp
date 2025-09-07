@@ -1,6 +1,3 @@
-// feature/player/src/main/java/com/sayeong/vv/player/PlayerScreen.kt
-
-
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -8,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.Player
@@ -21,7 +19,7 @@ fun MiniPlayerScreen(
     modifier: Modifier = Modifier
 ) {
     val progress = if (state.duration > 0) {
-        state.currentPosition.toFloat() / state.duration
+        (state.currentPosition.toFloat() / state.duration)
     } else {
         0f
     }
@@ -64,18 +62,20 @@ fun MiniPlayerScreen(
                         color = Color.LightGray
                     )
                 }
-                // 재생/일시정지 버튼
                 com.sayeong.vv.player.component.PlayPauseButton(player = player)
             }
             // 진행률 표시줄
             LinearProgressIndicator(
-                progress = { progress },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(2.dp)
-                    .align(Alignment.BottomCenter),
+                    .height(4.dp)
+                    .align(Alignment.BottomEnd),
+                gapSize = 0.dp,
+                progress = { progress},
+                strokeCap = StrokeCap.Square,
                 color = Color.Red,
-                trackColor = Color.Gray
+                trackColor = MaterialTheme.colorScheme.onSecondary,
+                drawStopIndicator = {}
             )
         }
     }

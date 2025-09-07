@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Slider
@@ -30,7 +29,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,8 +48,6 @@ import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import com.sayeong.vv.player.component.ExtraControls
 import com.sayeong.vv.player.model.LoadedState
 import com.sayeong.vv.player.model.PlayerState
-import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 @OptIn(UnstableApi::class)
@@ -95,13 +91,6 @@ fun PlayerScreen(
                     )
                 }
             }
-
-//            PlayerContent(
-//                player = viewModel.player,
-//                onPause = viewModel::onPause,
-//                onSeekTo = viewModel::seekTo,
-//                state = state // 현재 상태(Playing 또는 Stopped)를 전달
-//            )
         }
         else -> {}
     }
@@ -310,6 +299,7 @@ private fun PlayerBar(
         }
     }
 }
+
 
 // 시간을 mm:ss 형태로 변환해주는 헬퍼 함수
 private fun formatDuration(millis: Long): String {
