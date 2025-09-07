@@ -60,86 +60,52 @@ fun SayeongApp(
         isPlayerLaunched = true
     }
 
-    // isPlayerLaunched 상태에 따라 peekHeight를 동적으로 결정
-    val sheetPeekHeight = if (isPlayerLaunched) 80.dp else 0.dp
+    val sheetPeekHeight = if (isPlayerLaunched) 170.dp else 0.dp
 
-
-    LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
-        when(scaffoldState.bottomSheetState.currentValue) {
-            SheetValue.Expanded -> {
-
-            }
-            SheetValue.PartiallyExpanded -> {
-
-            }
-            else -> {}
-        }
-    }
-
-    SayeongBackground(modifier = Modifier) {
+    SayeongBackground(modifier = modifier) {
         SayeongGradientBackground(gradientColors = LocalGradientColors.current) {
-            BottomSheetScaffold(
-                scaffoldState = scaffoldState,
-                sheetContent = {
-                    PlayerScreen(
-                        viewModel = playerViewModel,
-                        targetSheetState = scaffoldState.bottomSheetState.targetValue,
-                        onExpand = {
-                            scope.launch {
-                                scaffoldState.bottomSheetState.expand()
-                            }
-                        }
-                    )
-                },
-                sheetPeekHeight = sheetPeekHeight,
+            Scaffold(
                 containerColor = Color.Transparent,
-                sheetShape = RectangleShape,
-                sheetDragHandle = {}
-            ) { innerPadding ->
-                Scaffold(
-                    containerColor = Color.Transparent,
-                    topBar = {
-                        if (currentTopLevelDestination != null) {
-                            TopAppBar(
-                                title = {
-                                    Text(
-                                        text = "${currentTopLevelDestination?.label}",
-                                        style = MaterialTheme.typography.titleLarge.copy(
-                                            fontWeight = FontWeight.Bold
-                                        ),
-                                        color = Color.Black,
-                                        modifier = Modifier.fillMaxWidth(),
-                                        textAlign = TextAlign.Center
-                                    )
-                                },
-                                navigationIcon = {
-                                    IconButton(onClick = {
-                                        appState.navigateToSearch()
-                                    }) {
-                                        Icon(
-                                            //TODO 이미지 한곳에서 모아서 쓸 수 있도록 수정 필요
-                                            painter = painterResource(id = com.sayeong.vv.ui.R.drawable.search_24px),
-                                            contentDescription = "Search"
-                                        )
-                                    }
-                                },
-                                actions = {
-                                    IconButton(onClick = {}) {
-                                        Icon(
-                                            //TODO 셋팅 이미지 노출 필요 (테마 설정 기능 추가 예정)
-                                            painter = painterResource(id = com.sayeong.vv.ui.R.drawable.bookmark_24px),
-                                            contentDescription = "Settings"
-                                        )
-                                    }
-                                },
-                                colors = TopAppBarDefaults.topAppBarColors(
-                                    containerColor = Color.Transparent,
-                                    titleContentColor = Color.Transparent
+                topBar = {
+                    if (currentTopLevelDestination != null
+                        && scaffoldState.bottomSheetState.targetValue == SheetValue.PartiallyExpanded) {
+                        TopAppBar(
+                            title = {
+                                Text(
+                                    text = "${currentTopLevelDestination.label}",
+                                    style = MaterialTheme.typography.titleLarge.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    color = Color.Black,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center
                                 )
+                            },
+                            navigationIcon = {
+                                IconButton(onClick = { appState.navigateToSearch() }) {
+                                    Icon(
+                                        painter = painterResource(id = com.sayeong.vv.ui.R.drawable.search_24px),
+                                        contentDescription = "Search"
+                                    )
+                                }
+                            },
+                            actions = {
+                                IconButton(onClick = {}) {
+                                    Icon(
+                                        painter = painterResource(id = com.sayeong.vv.ui.R.drawable.bookmark_24px),
+                                        contentDescription = "Settings"
+                                    )
+                                }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = Color.Transparent,
+                                titleContentColor = Color.Transparent
                             )
-                        }
-                    },
-                    bottomBar = {
+                        )
+                    }
+                },
+                bottomBar = {
+                    if (scaffoldState.bottomSheetState.targetValue == SheetValue.PartiallyExpanded) {
                         NavigationBar {
                             appState.topLevelDestinations.forEach { destination ->
                                 val selected =
@@ -154,16 +120,34 @@ fun SayeongApp(
                                         )
                                     },
                                     label = { Text(destination.label) }
-
                                 )
-
                             }
                         }
                     }
-                ) { innerScaffoldPadding ->
+                }
+            ) { innerScaffoldPadding ->
+                BottomSheetScaffold(
+                    modifier = Modifier.padding(top = innerScaffoldPadding.calculateTopPadding()),
+                    scaffoldState = scaffoldState,
+                    sheetContent = {
+                        PlayerScreen(
+                            viewModel = playerViewModel,
+                            targetSheetState = scaffoldState.bottomSheetState.targetValue,
+                            onExpand = {
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.expand()
+                                }
+                            }
+                        )
+                    },
+                    sheetPeekHeight = sheetPeekHeight,
+                    containerColor = Color.Transparent,
+                    sheetShape = RectangleShape,
+                    sheetDragHandle = {},
+                ) { innerBottomSheetPadding ->
                     SayeongNavHost(
-                        modifier = Modifier.padding(innerScaffoldPadding),
-                        appState.navController,
+                        modifier = Modifier.padding(innerBottomSheetPadding),
+                        navController = appState.navController,
                         onMusicClick = { music ->
                             playerViewModel.playMusic(music)
                             scope.launch {
