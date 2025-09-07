@@ -51,6 +51,7 @@ import com.sayeong.vv.player.component.ExtraControls
 import com.sayeong.vv.player.model.LoadedState
 import com.sayeong.vv.player.model.PlayerState
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 @OptIn(UnstableApi::class)

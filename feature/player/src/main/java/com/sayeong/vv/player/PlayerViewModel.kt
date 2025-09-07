@@ -56,27 +56,32 @@ class PlayerViewModel @Inject constructor(
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 // UI 업데이트
                 Timber.i("onIsPlayingChanged() | isPlaying: $isPlaying")
-                val currentState = _playerState.value as LoadedState
-                if (isPlaying) {
-                    _playerState.value = PlayerState.Playing(
-                        musicResource = currentState.musicResource,
-                        albumArt = currentState.albumArt,
-                        duration = player.duration,
-                        currentPosition = currentState.currentPosition,
-                        playbackSpeed = currentState.playbackSpeed,
-                        dominantColor = currentState.dominantColor,
-                        gradientColor = currentState.gradientColor
-                    )
-                } else {
-                    _playerState.value = PlayerState.Stopped(
-                        musicResource = currentState.musicResource,
-                        albumArt = currentState.albumArt,
-                        duration = player.duration,
-                        currentPosition = currentState.currentPosition,
-                        playbackSpeed = currentState.playbackSpeed,
-                        dominantColor = currentState.dominantColor,
-                        gradientColor = currentState.gradientColor
-                    )
+                _playerState.update { currentState ->
+                    if (currentState is LoadedState) {
+                        if (isPlaying) {
+                            PlayerState.Playing(
+                                musicResource = currentState.musicResource,
+                                albumArt = currentState.albumArt,
+                                duration = player.duration,
+                                currentPosition = currentState.currentPosition,
+                                playbackSpeed = currentState.playbackSpeed,
+                                dominantColor = currentState.dominantColor,
+                                gradientColor = currentState.gradientColor
+                            )
+                        } else {
+                            PlayerState.Stopped(
+                                musicResource = currentState.musicResource,
+                                albumArt = currentState.albumArt,
+                                duration = player.duration,
+                                currentPosition = currentState.currentPosition,
+                                playbackSpeed = currentState.playbackSpeed,
+                                dominantColor = currentState.dominantColor,
+                                gradientColor = currentState.gradientColor
+                            )
+                        }
+                    } else {
+                        currentState
+                    }
                 }
             }
 
@@ -86,6 +91,27 @@ class PlayerViewModel @Inject constructor(
                     _playerState.update { (it as PlayerState.Playing).copy(playbackSpeed = playbackParameters.speed) }
                 } else if (_playerState.value is PlayerState.Stopped) {
                     _playerState.update { (it as PlayerState.Stopped).copy(playbackSpeed = playbackParameters.speed) }
+                }
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_READY) {
+                    val newDuration = player.duration
+                    // duration이 유효한 경우에만 상태를 업데이트합니다.
+                    if (newDuration > 0) {
+                        _playerState.update { currentState ->
+                            // 현재 상태가 LoadedState일 때만 duration을 갱신합니다.
+                            if (currentState is LoadedState) {
+                                when(currentState) {
+                                    is PlayerState.Playing -> currentState.copy(duration = newDuration)
+                                    is PlayerState.Stopped -> currentState.copy(duration = newDuration)
+                                    PlayerState.Idle -> currentState
+                                }
+                            } else {
+                                currentState
+                            }
+                        }
+                    }
                 }
             }
         })
@@ -121,11 +147,10 @@ class PlayerViewModel @Inject constructor(
             musicResource = music,
             currentPosition = 0L,
         )
-        val currentState = _playerState.value
         viewModelScope.launch {
             val albumArtResult = getAlbumArtAndColor(music.originalName)
             _playerState.update {
-                (currentState as PlayerState.Playing).copy(
+                (it as PlayerState.Playing).copy(
                     albumArt = albumArtResult?.bitmap,
                     dominantColor = albumArtResult?.domainColor,
                     gradientColor = albumArtResult?.gradientColor
