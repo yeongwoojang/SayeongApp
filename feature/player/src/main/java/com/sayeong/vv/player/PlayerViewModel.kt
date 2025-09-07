@@ -136,25 +136,32 @@ class PlayerViewModel @Inject constructor(
 
     fun playMusic(music: MusicResource) {
         if (_playerState.value != PlayerState.Idle) {
-            val prevMusic = _playerState.value as LoadedState
-            if (music == prevMusic.musicResource) {
+            val prevMusicState = _playerState.value as LoadedState
+            if (music == prevMusicState.musicResource) {
                 return
             }
         }
 
-        Timber.i("TEST_LOG | playMusic")
         _playerState.value = PlayerState.Playing(
             musicResource = music,
             currentPosition = 0L,
         )
         viewModelScope.launch {
             val albumArtResult = getAlbumArtAndColor(music.originalName)
-            _playerState.update {
-                (it as PlayerState.Playing).copy(
-                    albumArt = albumArtResult?.bitmap,
-                    dominantColor = albumArtResult?.domainColor,
-                    gradientColor = albumArtResult?.gradientColor
-                )
+            _playerState.update { currentState ->
+                if (currentState is LoadedState) {
+                    PlayerState.Playing(
+                        musicResource = currentState.musicResource,
+                        duration = player.duration,
+                        currentPosition = currentState.currentPosition,
+                        playbackSpeed = currentState.playbackSpeed,
+                        albumArt = albumArtResult?.bitmap,
+                        dominantColor = albumArtResult?.domainColor,
+                        gradientColor = albumArtResult?.gradientColor,
+                    )
+                } else {
+                    currentState
+                }
             }
         }
 

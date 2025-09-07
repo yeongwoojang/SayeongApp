@@ -45,7 +45,6 @@ fun SayeongApp(
     appState: SayeongAppState,
     modifier: Modifier = Modifier
 ) {
-    // 1. BottomSheet의 상태를 관리할 State와 CoroutineScope를 생성합니다.
     val scaffoldState = rememberBottomSheetScaffoldState()
     val scope = rememberCoroutineScope()
     val playerViewModel: PlayerViewModel = hiltViewModel()
@@ -56,7 +55,6 @@ fun SayeongApp(
         currentDestination?.hierarchy?.any { it.route == destination.route } == true
     }
 
-    // 플레이어가 한 번이라도 활성화되었는지 기억하는 상태
     var isPlayerLaunched by rememberSaveable { mutableStateOf(false) }
     if (playerState !is PlayerState.Idle) {
         isPlayerLaunched = true
