@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.Player
 import com.sayeong.vv.player.model.LoadedState
+import timber.log.Timber
 
 @Composable
 fun MiniPlayerScreen(

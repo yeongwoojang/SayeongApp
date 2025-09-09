@@ -37,11 +37,10 @@ class PlayerViewModel @Inject constructor(
     private val _playerState = MutableStateFlow<PlayerState>(PlayerState.Idle)
     val playerState =_playerState.asStateFlow()
 
-
     private val availableSpeeds = listOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f)
 
     // 재생 시간 업데이트를 위한 Flow
-    val playerPosition = flow {
+    private val playerPosition = flow {
         while (true) {
             if (player.isPlaying) {
                 emit(player.currentPosition)
@@ -131,6 +130,8 @@ class PlayerViewModel @Inject constructor(
         player.seekTo(position)
         if (_playerState.value is PlayerState.Playing) {
             _playerState.update { (it as PlayerState.Playing).copy(currentPosition = position) }
+        } else if (_playerState.value is PlayerState.Stopped){
+            _playerState.update { (it as PlayerState.Stopped).copy(currentPosition = position) }
         }
     }
 

@@ -48,6 +48,7 @@ import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import com.sayeong.vv.player.component.ExtraControls
 import com.sayeong.vv.player.model.LoadedState
 import com.sayeong.vv.player.model.PlayerState
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 @OptIn(UnstableApi::class)
@@ -57,26 +58,19 @@ fun PlayerScreen(
     targetSheetState: SheetValue,
     onExpand : () -> Unit
 ) {
-    // 1. 변수 이름을 playerState로 명확하게 변경합니다.
     val playerState by viewModel.playerState.collectAsStateWithLifecycle()
 
-    // 2. when 표현식을 사용하여 상태별로 UI를 분기합니다.
     when (val state = playerState) {
-        // PlayerState가 Idle일 때는 아무것도 표시하지 않습니다.
         is PlayerState.Idle -> {
-            Box(modifier = Modifier.fillMaxHeight()) {
-                // 비어있음
-            }
+            Box(modifier = Modifier.fillMaxHeight())
         }
-        // PlayerState가 Playing 또는 Stopped일 때
         is LoadedState -> {
-            // Crossfade를 사용해 두 UI를 부드럽게 전환합니다.
             Crossfade(
                 targetState = targetSheetState,
                 label = "PlayerUI"
             ) { targetState ->
                 if (targetState == SheetValue.Expanded) {
-                    // 펼쳐진 상태일 때: 전체 화면 플레이어
+                    //_ 전체 화면 플레이어
                     PlayerContent(
                         player = viewModel.player,
                         onPause = viewModel::onPause,
@@ -84,6 +78,7 @@ fun PlayerScreen(
                         state = state
                     )
                 } else {
+                    //_ 미니 플레이어
                     MiniPlayerScreen(
                         state = state,
                         player = viewModel.player,
@@ -129,26 +124,24 @@ private fun PlayerContent(
         }
     }
 
-    // --- 이 부분을 새로운 Column 구조로 변경합니다 ---
     Column(
         modifier = Modifier
-            .fillMaxSize() // Column이 전체를 채우도록 변경
+            .fillMaxSize()
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        dominantColor.copy(alpha = 0.8f), // 위쪽 색상
-                        gradientColor.copy(alpha = 0.6f), // 아래쪽 색상
+                        dominantColor.copy(alpha = 0.8f), //_ 위쪽 색상
+                        gradientColor.copy(alpha = 0.6f), //_ 아래쪽 색상
                         dominantColor.copy(alpha = 0.8f)
                     )
                 )
             )
 
     ) {
-        // 1. 앨범 아트 섹션 (화면의 남는 공간을 모두 차지)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f) // 남는 공간을 모두 차지
+                .weight(1f) //_ 남는 공간을 모두 차지
         ) {
             PlayerSurface(
                 player,
@@ -165,7 +158,6 @@ private fun PlayerContent(
             }
         }
 
-        // 2. 음악 정보 및 컨트롤러 섹션
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -173,13 +165,11 @@ private fun PlayerContent(
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 음악 제목
             Text(
                 text = state.musicResource.originalName,
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            // 아티스트 이름 (예시)
             Text(
                 text = state.musicResource.artist ?: "Unknown Artist",
                 style = MaterialTheme.typography.bodyMedium,
@@ -187,12 +177,11 @@ private fun PlayerContent(
                 modifier = Modifier.padding(top = 4.dp)
             )
 
-            // 플레이어 바 (슬라이더, 시간)
             PlayerBar(
                 modifier = Modifier.padding(top = 16.dp),
                 sliderPosition = sliderPosition,
                 onValueChange = { newPosition ->
-                    isUserSeeking = true // isUserSeeking 상태 업데이트 추가
+                    isUserSeeking = true
                     sliderPosition = newPosition
                 },
                 onValueChangeFinished = {
@@ -202,7 +191,6 @@ private fun PlayerContent(
                 duration = state.duration
             )
 
-            // 재생/일시정지, 이전/다음 등 추가 컨트롤
             ExtraControls(
                 modifier = Modifier.padding(top = 8.dp),
                 player = player,
@@ -301,7 +289,6 @@ private fun PlayerBar(
 }
 
 
-// 시간을 mm:ss 형태로 변환해주는 헬퍼 함수
 private fun formatDuration(millis: Long): String {
     val minutes = TimeUnit.MILLISECONDS.toMinutes(millis)
     val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) % 60
