@@ -60,7 +60,7 @@ fun SayeongApp(
         isPlayerLaunched = true
     }
 
-    val sheetPeekHeight = if (isPlayerLaunched) 170.dp else 0.dp
+    val sheetPeekHeight = if (isPlayerLaunched) 172.dp else 0.dp
 
     SayeongBackground(modifier = modifier) {
         SayeongGradientBackground(gradientColors = LocalGradientColors.current) {

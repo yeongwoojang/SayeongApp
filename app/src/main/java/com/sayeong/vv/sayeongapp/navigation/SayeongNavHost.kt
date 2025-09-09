@@ -4,9 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import com.sayeong.vv.bookmark.navigation.bookmarkScreen
-import com.sayeong.vv.home.HomeScreen
 import com.sayeong.vv.home.navigation.homeScreen
 import com.sayeong.vv.model.MusicResource
 import com.sayeong.vv.search.navigation.searchScreen
