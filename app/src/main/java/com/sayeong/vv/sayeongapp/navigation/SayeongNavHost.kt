@@ -13,7 +13,8 @@ import com.sayeong.vv.search.navigation.searchScreen
 fun SayeongNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    onMusicClick: (MusicResource) -> Unit
+    onMusicClick: (MusicResource) -> Unit,
+    onMusicPlay: (List<MusicResource>) -> Unit
 ) {
 
     NavHost(
@@ -22,7 +23,8 @@ fun SayeongNavHost(
         modifier = modifier
     ) {
         homeScreen(
-            onMusicClick = onMusicClick
+            onMusicClick = onMusicClick,
+            onMusicPlay = onMusicPlay
         )
 
         searchScreen(

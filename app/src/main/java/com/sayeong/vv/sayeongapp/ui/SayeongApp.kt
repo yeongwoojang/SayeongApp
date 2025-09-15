@@ -149,7 +149,13 @@ fun SayeongApp(
                         modifier = Modifier.padding(innerBottomSheetPadding),
                         navController = appState.navController,
                         onMusicClick = { music ->
-                            playerViewModel.playMusic(music)
+//                            playerViewModel.playMusic(music)
+                            scope.launch {
+                                scaffoldState.bottomSheetState.expand()
+                            }
+                        },
+                        onMusicPlay = { musics ->
+                            playerViewModel.playMusics(musics)
                             scope.launch {
                                 scaffoldState.bottomSheetState.expand()
                             }

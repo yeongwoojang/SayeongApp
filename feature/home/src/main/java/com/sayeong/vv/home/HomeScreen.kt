@@ -57,7 +57,8 @@ import com.sayeong.vv.ui.components.MusicItem
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onMusicClick: (MusicResource) -> Unit
+    onMusicClick: (MusicResource) -> Unit,
+    omMusicPlay: (List<MusicResource>) -> Unit
 ) {
 
     val topicUiState by viewModel.topicUiState.collectAsStateWithLifecycle()
@@ -133,7 +134,8 @@ fun HomeScreen(
         musicList(
             musicUiState,
             onToggleBookMark = viewModel::toggleBookMark,
-            onMusicClick = onMusicClick
+            onMusicClick = onMusicClick,
+            onMusicPlay = omMusicPlay,
         )
     }
 }
@@ -141,7 +143,8 @@ fun HomeScreen(
 private fun LazyStaggeredGridScope.musicList(
     uiState: MusicUiState,
     onToggleBookMark: (MusicResource) -> Unit,
-    onMusicClick: (MusicResource) -> Unit
+    onMusicClick: (MusicResource) -> Unit,
+    onMusicPlay: (List<MusicResource>) -> Unit,
 ) {
     if (uiState is MusicUiState.Shown) {
         if (uiState.musics.isNotEmpty()) {
@@ -155,7 +158,11 @@ private fun LazyStaggeredGridScope.musicList(
                     musicUiModel = music,
                     modifier = Modifier.fillMaxWidth().animateItem(),
                     onToggleBookMark = { onToggleBookMark(music.musicResource) },
-                    onMusicClick = { onMusicClick(music.musicResource) }
+                    onMusicClick = { onMusicClick(music.musicResource) },
+                    onPlayMusic = {
+                        val curIdx = musicUiModels.indexOf(music)
+                        onMusicPlay(musicUiModels.drop(curIdx).map { it.musicResource })
+                    }
                 )
             }
         }

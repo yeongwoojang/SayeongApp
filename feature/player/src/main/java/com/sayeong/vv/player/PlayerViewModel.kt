@@ -6,8 +6,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Metadata
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
+import androidx.media3.common.Tracks
 import androidx.palette.graphics.Palette
 import com.sayeong.vv.domain.GetAlbumArtUseCase
 import com.sayeong.vv.model.MusicResource
@@ -49,9 +52,56 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-
     init {
         player.addListener(object: Player.Listener {
+
+
+            override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+                val currentState = _playerState.value as LoadedState
+                val currentMusic = currentState.musicResources.find { it.originalName == mediaMetadata.title }
+
+                if (currentMusic != null) {
+                    if (currentState is PlayerState.Playing) {
+                        _playerState.update {
+                            (it as PlayerState.Playing).copy(
+                                musicResource = currentMusic,
+                                currentPosition = 0L,
+                            )
+                        }
+                    } else if (currentState is PlayerState.Stopped) {
+                        _playerState.update {
+                            PlayerState.Playing(
+                                musicResources = currentState.musicResources,
+                                musicResource = currentMusic,
+                                currentPosition = 0L,
+                            )
+                        }
+                    }
+
+                    viewModelScope.launch {
+                        val albumArtResult = getAlbumArtAndColor(currentMusic.originalName)
+                        _playerState.update { currentState ->
+                            if (currentState is LoadedState) {
+                                PlayerState.Playing(
+                                    musicResources = currentState.musicResources,
+                                    musicResource = currentState.musicResource,
+                                    duration = player.duration,
+                                    currentPosition = currentState.currentPosition,
+                                    playbackSpeed = currentState.playbackSpeed,
+                                    albumArt = albumArtResult?.bitmap,
+                                    dominantColor = albumArtResult?.domainColor,
+                                    gradientColor = albumArtResult?.gradientColor,
+                                )
+                            } else {
+                                currentState
+                            }
+                        }
+                    }
+                }
+            }
+
+
+
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 // UI 업데이트
                 Timber.i("onIsPlayingChanged() | isPlaying: $isPlaying")
@@ -59,6 +109,7 @@ class PlayerViewModel @Inject constructor(
                     if (currentState is LoadedState) {
                         if (isPlaying) {
                             PlayerState.Playing(
+                                musicResources = currentState.musicResources,
                                 musicResource = currentState.musicResource,
                                 albumArt = currentState.albumArt,
                                 duration = player.duration,
@@ -69,6 +120,7 @@ class PlayerViewModel @Inject constructor(
                             )
                         } else {
                             PlayerState.Stopped(
+                                musicResources = currentState.musicResources,
                                 musicResource = currentState.musicResource,
                                 albumArt = currentState.albumArt,
                                 duration = player.duration,
@@ -133,6 +185,31 @@ class PlayerViewModel @Inject constructor(
         } else if (_playerState.value is PlayerState.Stopped){
             _playerState.update { (it as PlayerState.Stopped).copy(currentPosition = position) }
         }
+    }
+
+    fun playMusics(musics: List<MusicResource>) {
+        Timber.i("playMusics() | musics: $musics")
+        val firstMusic = musics.first()
+        if (_playerState.value != PlayerState.Idle) {
+            val prevMusicState = _playerState.value as LoadedState
+            if (firstMusic == prevMusicState.musicResource) {
+                return
+            }
+        }
+
+        _playerState.value = PlayerState.Playing(
+            musicResources = musics,
+            musicResource = firstMusic,
+            currentPosition = 0L,
+        )
+
+        val mediaItems = musics.map {
+            MediaItem.fromUri("http://10.0.2.2:3000/uploads/${it.originalName}")
+                .buildUpon().setMediaMetadata(MediaMetadata.Builder().setTitle(it.originalName).build()).build()
+        }
+        player.setMediaItems(mediaItems)
+        player.prepare()
+        player.play()
     }
 
     fun playMusic(music: MusicResource) {

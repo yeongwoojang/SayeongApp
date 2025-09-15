@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import com.sayeong.vv.model.MusicResource
 
 interface LoadedState {
+    val musicResources: List<MusicResource>
     val musicResource: MusicResource
     val albumArt: Bitmap?
     val duration: Long
@@ -18,6 +19,7 @@ sealed interface PlayerState {
     data object Idle: PlayerState
 
     data class Stopped(
+        override val musicResources: List<MusicResource> = emptyList(),
         override val musicResource: MusicResource,
         override val albumArt: Bitmap? = null,
         override val duration: Long = 0L,
@@ -28,6 +30,7 @@ sealed interface PlayerState {
     ): LoadedState, PlayerState
 
     data class Playing(
+        override val musicResources: List<MusicResource> = emptyList(),
         override val musicResource: MusicResource,
         override val albumArt: Bitmap? = null,
         override val duration: Long = 0L,
