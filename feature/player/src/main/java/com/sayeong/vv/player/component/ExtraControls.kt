@@ -16,7 +16,9 @@ internal fun ExtraControls(player: Player, modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         PlaybackSpeedPopUpButton(player)
+        PlayJumpButton(player, isNext = false)
         PlayPauseButton(player)
+        PlayJumpButton(player, isNext = true)
         ShuffleButton(player)
         RepeatButton(player)
     }
