@@ -30,6 +30,7 @@ coil = "2.7.0"
 palette = "1.0.0"
 kotlinxSerializationJson = "1.8.0"
 room = "2.7.2"
+media3Session = "1.8.0"
 
 
 [libraries]
@@ -105,6 +106,7 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
+androidx-media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3Session" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

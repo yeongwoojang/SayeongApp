@@ -1,5 +1,7 @@
 package com.sayeong.vv.player
 
+import android.content.ComponentName
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.ui.graphics.Color
@@ -9,12 +11,16 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import androidx.palette.graphics.Palette
+import com.google.common.util.concurrent.MoreExecutors
 import com.sayeong.vv.domain.GetAlbumArtUseCase
 import com.sayeong.vv.model.MusicResource
 import com.sayeong.vv.player.model.LoadedState
 import com.sayeong.vv.player.model.PlayerState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,12 +37,152 @@ private data class AlbumArtResult(val bitmap: Bitmap, val domainColor: Color, va
 
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
-    val player: Player,
+    @ApplicationContext private val context: Context,
     private val getAlbumArtUseCase: GetAlbumArtUseCase
 ): ViewModel() {
 
     private val _playerState = MutableStateFlow<PlayerState>(PlayerState.Idle)
     val playerState =_playerState.asStateFlow()
+
+    @Inject
+    lateinit var player: Player
+
+    init {
+        initializeController()
+    }
+
+    private fun initializeController() {
+        val sessionToken = SessionToken(context, ComponentName(context, PlayBackService::class.java))
+        val controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
+        controllerFuture.addListener(
+            {
+                player = controllerFuture.get()
+                player.addListener(object: Player.Listener {
+                    override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+                        val currentState = _playerState.value as LoadedState
+                        val currentMusic = currentState.musicResources.find { it.originalName == mediaMetadata.title }
+
+                        if (currentMusic != null) {
+                            if (currentState is PlayerState.Playing) {
+                                _playerState.update {
+                                    (it as PlayerState.Playing).copy(
+                                        musicResource = currentMusic,
+                                        currentPosition = 0L,
+                                    )
+                                }
+                            } else if (currentState is PlayerState.Stopped) {
+                                _playerState.update {
+                                    PlayerState.Playing(
+                                        musicResources = currentState.musicResources,
+                                        musicResource = currentMusic,
+                                        currentPosition = 0L,
+                                    )
+                                }
+                            }
+
+                            viewModelScope.launch {
+                                val albumArtResult = getAlbumArtAndColor(currentMusic.originalName)
+                                _playerState.update { currentState ->
+                                    if (currentState is LoadedState) {
+                                        PlayerState.Playing(
+                                            musicResources = currentState.musicResources,
+                                            musicResource = currentState.musicResource,
+                                            duration = player.duration,
+                                            currentPosition = currentState.currentPosition,
+                                            playbackSpeed = currentState.playbackSpeed,
+                                            albumArt = albumArtResult?.bitmap,
+                                            dominantColor = albumArtResult?.domainColor,
+                                            gradientColor = albumArtResult?.gradientColor,
+                                        )
+                                    } else {
+                                        currentState
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
+
+                    override fun onIsPlayingChanged(isPlaying: Boolean) {
+                        // UI 업데이트
+                        Timber.i("onIsPlayingChanged() | isPlaying: $isPlaying")
+                        _playerState.update { currentState ->
+                            if (currentState is LoadedState) {
+                                if (isPlaying) {
+                                    PlayerState.Playing(
+                                        musicResources = currentState.musicResources,
+                                        musicResource = currentState.musicResource,
+                                        albumArt = currentState.albumArt,
+                                        duration = player.duration,
+                                        currentPosition = currentState.currentPosition,
+                                        playbackSpeed = currentState.playbackSpeed,
+                                        dominantColor = currentState.dominantColor,
+                                        gradientColor = currentState.gradientColor
+                                    )
+                                } else {
+                                    PlayerState.Stopped(
+                                        musicResources = currentState.musicResources,
+                                        musicResource = currentState.musicResource,
+                                        albumArt = currentState.albumArt,
+                                        duration = player.duration,
+                                        currentPosition = currentState.currentPosition,
+                                        playbackSpeed = currentState.playbackSpeed,
+                                        dominantColor = currentState.dominantColor,
+                                        gradientColor = currentState.gradientColor
+                                    )
+                                }
+                            } else {
+                                currentState
+                            }
+                        }
+                    }
+
+                    override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {
+                        Timber.i("onPlaybackParametersChanged() | playbackParameters: ${playbackParameters.speed}")
+                        if (_playerState.value is PlayerState.Playing) {
+                            _playerState.update { (it as PlayerState.Playing).copy(playbackSpeed = playbackParameters.speed) }
+                        } else if (_playerState.value is PlayerState.Stopped) {
+                            _playerState.update { (it as PlayerState.Stopped).copy(playbackSpeed = playbackParameters.speed) }
+                        }
+                    }
+
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        if (playbackState == Player.STATE_READY) {
+                            val newDuration = player.duration
+                            // duration이 유효한 경우에만 상태를 업데이트합니다.
+                            if (newDuration > 0) {
+                                _playerState.update { currentState ->
+                                    // 현재 상태가 LoadedState일 때만 duration을 갱신합니다.
+                                    if (currentState is LoadedState) {
+                                        when(currentState) {
+                                            is PlayerState.Playing -> currentState.copy(duration = newDuration)
+                                            is PlayerState.Stopped -> currentState.copy(duration = newDuration)
+                                            PlayerState.Idle -> currentState
+                                        }
+                                    } else {
+                                        currentState
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
+
+                viewModelScope.launch {
+                    playerPosition.collect { position ->
+                        if (_playerState.value is PlayerState.Playing) {
+                            _playerState.update { (it as PlayerState.Playing).copy(currentPosition = position) }
+                        } else if (_playerState.value is PlayerState.Stopped) {
+                            _playerState.update { (it as PlayerState.Stopped).copy(currentPosition = position) }
+                        }
+                    }
+                }
+                // Listen for player events
+            },
+            MoreExecutors.directExecutor()
+        )
+    }
 
     private val availableSpeeds = listOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f)
 
@@ -50,131 +196,6 @@ class PlayerViewModel @Inject constructor(
         }
     }
 
-    init {
-        player.addListener(object: Player.Listener {
-
-
-            override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
-                val currentState = _playerState.value as LoadedState
-                val currentMusic = currentState.musicResources.find { it.originalName == mediaMetadata.title }
-
-                if (currentMusic != null) {
-                    if (currentState is PlayerState.Playing) {
-                        _playerState.update {
-                            (it as PlayerState.Playing).copy(
-                                musicResource = currentMusic,
-                                currentPosition = 0L,
-                            )
-                        }
-                    } else if (currentState is PlayerState.Stopped) {
-                        _playerState.update {
-                            PlayerState.Playing(
-                                musicResources = currentState.musicResources,
-                                musicResource = currentMusic,
-                                currentPosition = 0L,
-                            )
-                        }
-                    }
-
-                    viewModelScope.launch {
-                        val albumArtResult = getAlbumArtAndColor(currentMusic.originalName)
-                        _playerState.update { currentState ->
-                            if (currentState is LoadedState) {
-                                PlayerState.Playing(
-                                    musicResources = currentState.musicResources,
-                                    musicResource = currentState.musicResource,
-                                    duration = player.duration,
-                                    currentPosition = currentState.currentPosition,
-                                    playbackSpeed = currentState.playbackSpeed,
-                                    albumArt = albumArtResult?.bitmap,
-                                    dominantColor = albumArtResult?.domainColor,
-                                    gradientColor = albumArtResult?.gradientColor,
-                                )
-                            } else {
-                                currentState
-                            }
-                        }
-                    }
-                }
-            }
-
-
-
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                // UI 업데이트
-                Timber.i("onIsPlayingChanged() | isPlaying: $isPlaying")
-                _playerState.update { currentState ->
-                    if (currentState is LoadedState) {
-                        if (isPlaying) {
-                            PlayerState.Playing(
-                                musicResources = currentState.musicResources,
-                                musicResource = currentState.musicResource,
-                                albumArt = currentState.albumArt,
-                                duration = player.duration,
-                                currentPosition = currentState.currentPosition,
-                                playbackSpeed = currentState.playbackSpeed,
-                                dominantColor = currentState.dominantColor,
-                                gradientColor = currentState.gradientColor
-                            )
-                        } else {
-                            PlayerState.Stopped(
-                                musicResources = currentState.musicResources,
-                                musicResource = currentState.musicResource,
-                                albumArt = currentState.albumArt,
-                                duration = player.duration,
-                                currentPosition = currentState.currentPosition,
-                                playbackSpeed = currentState.playbackSpeed,
-                                dominantColor = currentState.dominantColor,
-                                gradientColor = currentState.gradientColor
-                            )
-                        }
-                    } else {
-                        currentState
-                    }
-                }
-            }
-
-            override fun onPlaybackParametersChanged(playbackParameters: PlaybackParameters) {
-                Timber.i("onPlaybackParametersChanged() | playbackParameters: ${playbackParameters.speed}")
-                if (_playerState.value is PlayerState.Playing) {
-                    _playerState.update { (it as PlayerState.Playing).copy(playbackSpeed = playbackParameters.speed) }
-                } else if (_playerState.value is PlayerState.Stopped) {
-                    _playerState.update { (it as PlayerState.Stopped).copy(playbackSpeed = playbackParameters.speed) }
-                }
-            }
-
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                if (playbackState == Player.STATE_READY) {
-                    val newDuration = player.duration
-                    // duration이 유효한 경우에만 상태를 업데이트합니다.
-                    if (newDuration > 0) {
-                        _playerState.update { currentState ->
-                            // 현재 상태가 LoadedState일 때만 duration을 갱신합니다.
-                            if (currentState is LoadedState) {
-                                when(currentState) {
-                                    is PlayerState.Playing -> currentState.copy(duration = newDuration)
-                                    is PlayerState.Stopped -> currentState.copy(duration = newDuration)
-                                    PlayerState.Idle -> currentState
-                                }
-                            } else {
-                                currentState
-                            }
-                        }
-                    }
-                }
-            }
-        })
-
-        viewModelScope.launch {
-            playerPosition.collect { position ->
-                if (_playerState.value is PlayerState.Playing) {
-                    _playerState.update { (it as PlayerState.Playing).copy(currentPosition = position) }
-                } else if (_playerState.value is PlayerState.Stopped) {
-                    _playerState.update { (it as PlayerState.Stopped).copy(currentPosition = position) }
-                }
-            }
-        }
-    }
 
     fun seekTo(position: Long) {
         player.seekTo(position)
