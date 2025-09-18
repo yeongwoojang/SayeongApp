@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.sayeong.vv.home.HomeScreen
@@ -18,26 +21,26 @@ import com.sayeong.vv.sayeongapp.ui.SayeongApp
 import com.sayeong.vv.sayeongapp.ui.rememberSayeongAppState
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
+import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val lightScrim = android.graphics.Color.argb(0xe6, 0xFF, 0xFF, 0xFF)
-
-    /**
-     * The default dark scrim, as defined by androidx and the platform:
-     * https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:activity/activity/src/main/java/androidx/activity/EdgeToEdge.kt;l=40-44;drc=27e7d52e8604a080133e8b842db10c89b4482598
-     */
-    private val darkScrim = android.graphics.Color.argb(0x80, 0x1b, 0x1b, 0x1b)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+
+        var shouldLaunchPlayer by mutableStateOf(intent.getBooleanExtra("LAUNCH_PLAYER", false))
+
+        Timber.i("TEST_LOG | shouldLaunchPlayer: $shouldLaunchPlayer")
 
         setContent {
             SayeongAppTheme {
                 val appState = rememberSayeongAppState()
                 SayeongApp(
-                    appState = appState
+                    appState = appState,
+                    shouldLaunchPlayer = shouldLaunchPlayer,
+                    onPlayerLaunched = { shouldLaunchPlayer = false }
                 )
             }
         }

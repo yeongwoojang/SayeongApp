@@ -43,6 +43,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun SayeongApp(
     appState: SayeongAppState,
+    shouldLaunchPlayer: Boolean, // MainActivity로부터 받을 신호
+    onPlayerLaunched: () -> Unit, // 실행 완료 후 MainActivity에 알릴 콜백
     modifier: Modifier = Modifier
 ) {
     val scaffoldState = rememberBottomSheetScaffoldState()
@@ -54,6 +56,16 @@ fun SayeongApp(
     val currentTopLevelDestination = appState.topLevelDestinations.find { destination ->
         currentDestination?.hierarchy?.any { it.route == destination.route } == true
     }
+
+    LaunchedEffect(shouldLaunchPlayer) {
+        if (shouldLaunchPlayer) {
+            scope.launch {
+                scaffoldState.bottomSheetState.expand()
+                onPlayerLaunched() // 실행 완료 콜백 호출
+            }
+        }
+    }
+
 
     var isPlayerLaunched by rememberSaveable { mutableStateOf(false) }
     if (playerState !is PlayerState.Idle) {

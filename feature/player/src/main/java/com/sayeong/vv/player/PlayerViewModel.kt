@@ -14,6 +14,7 @@ import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.palette.graphics.Palette
+import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.sayeong.vv.domain.GetAlbumArtUseCase
 import com.sayeong.vv.model.MusicResource
@@ -44,8 +45,9 @@ class PlayerViewModel @Inject constructor(
     private val _playerState = MutableStateFlow<PlayerState>(PlayerState.Idle)
     val playerState =_playerState.asStateFlow()
 
-    @Inject
-    lateinit var player: Player
+    lateinit var player: MediaController
+    private var controllerFuture: ListenableFuture<MediaController>? = null
+
 
     init {
         initializeController()
@@ -53,10 +55,10 @@ class PlayerViewModel @Inject constructor(
 
     private fun initializeController() {
         val sessionToken = SessionToken(context, ComponentName(context, PlayBackService::class.java))
-        val controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
-        controllerFuture.addListener(
+        controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
+        controllerFuture?.addListener(
             {
-                player = controllerFuture.get()
+                player = controllerFuture!!.get()
                 player.addListener(object: Player.Listener {
                     override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
                         val currentState = _playerState.value as LoadedState
@@ -291,8 +293,10 @@ class PlayerViewModel @Inject constructor(
         super.onCleared()
         Timber.i("onCleared()")
         player.release()
+        if (::player.isInitialized) {
+            MediaController.releaseFuture(controllerFuture!!)
+        }
     }
-
 
     private suspend fun getAlbumArtAndColor(resourceName: String): AlbumArtResult? {
         val albumArtByte = getAlbumArtUseCase(resourceName) ?: return null
