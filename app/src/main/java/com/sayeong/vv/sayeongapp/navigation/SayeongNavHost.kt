@@ -29,11 +29,11 @@ fun SayeongNavHost(
 
         searchScreen(
             onBackClick = navController::popBackStack,
-            onMusicClick = onMusicClick
+            onMusicPlay = onMusicPlay
         )
 
         bookmarkScreen(
-            onMusicClick = onMusicClick
+            onMusicPlay = onMusicPlay
         )
     }
 }

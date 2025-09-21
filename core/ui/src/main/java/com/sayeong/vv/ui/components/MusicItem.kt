@@ -35,14 +35,12 @@ fun MusicItem(
     musicUiModel: MusicUiModel,
     modifier: Modifier,
     onToggleBookMark: (MusicResource) -> Unit = {},
-    onMusicClick: () -> Unit = {},
     onPlayMusic: () -> Unit = {},
 ) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(8.dp),
         color = MaterialTheme.colorScheme.surface,
-//        onClick = onMusicClick,
         onClick = onPlayMusic
     ) {
         Row(

@@ -3,6 +3,7 @@ package com.sayeong.vv.bookmark
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,7 +26,7 @@ import com.sayeong.vv.ui.components.MusicItem
 @Composable
 fun BookmarkScreen(
     viewModel: BookmarkViewModel = hiltViewModel(),
-    onMusicClick: (MusicResource) -> Unit
+    onMusicPlay: (List<MusicResource>) -> Unit
 ) {
 
     val bookmarkUiState by viewModel.bookmarkUiState.collectAsStateWithLifecycle()
@@ -52,7 +53,7 @@ fun BookmarkScreen(
                         .padding(top = 24.dp)
                         .padding(horizontal = 24.dp),
                     musics = state.musicResources,
-                    onMusicClick = onMusicClick,
+                    onMusicPlay = onMusicPlay,
                     onToggleBookMark = viewModel::toggleBookMark
                 )
             }
@@ -66,12 +67,13 @@ fun BookmarkScreen(
 fun BookmarkContent(
     modifier: Modifier,
     musics: List<MusicUiModel>,
-    onMusicClick: (MusicResource) -> Unit,
+    onMusicPlay: (List<MusicResource>) -> Unit,
     onToggleBookMark: (MusicResource) -> Unit
 ) {
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(24.dp),
+        contentPadding = PaddingValues(bottom = 16.dp)
     ) {
         items(
             items = musics,
@@ -82,7 +84,10 @@ fun BookmarkContent(
                 musicUiModel = music,
                 modifier = Modifier,
                 onToggleBookMark = onToggleBookMark,
-                onMusicClick = { onMusicClick(music.musicResource) }
+                onPlayMusic = {
+                    val curIdx = musics.indexOf(music)
+                    onMusicPlay(musics.drop(curIdx).map { it.musicResource })
+                }
             )
         }
     }

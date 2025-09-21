@@ -15,13 +15,12 @@ fun NavController.navigateToSearch(navOptions: NavOptions? = null) =
 
 fun NavGraphBuilder.searchScreen(
     onBackClick: () -> Unit,
-    onMusicClick: (MusicResource) -> Unit
+    onMusicPlay: (List<MusicResource>) -> Unit
 ) {
     composable(SayeongDestination.SEARCH.route) {
         SearchScreen(
             onBackClick = onBackClick,
-            onMusicClick = onMusicClick
+            onMusicPlay = onMusicPlay,
         )
-
     }
 }

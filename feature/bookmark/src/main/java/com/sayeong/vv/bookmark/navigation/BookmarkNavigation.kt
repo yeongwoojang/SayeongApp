@@ -7,11 +7,11 @@ import com.sayeong.vv.model.MusicResource
 import com.sayeong.vv.ui.SayeongDestination
 
 fun NavGraphBuilder.bookmarkScreen(
-    onMusicClick: (MusicResource) -> Unit
+    onMusicPlay: (List<MusicResource>) -> Unit
 ) {
     composable(SayeongDestination.BOOKMARK.route) {
         BookmarkScreen(
-            onMusicClick = onMusicClick
+            onMusicPlay = onMusicPlay,
         )
     }
 }

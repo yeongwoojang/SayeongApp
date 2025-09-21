@@ -134,7 +134,6 @@ fun HomeScreen(
         musicList(
             musicUiState,
             onToggleBookMark = viewModel::toggleBookMark,
-            onMusicClick = onMusicClick,
             onMusicPlay = omMusicPlay,
         )
     }
@@ -143,7 +142,6 @@ fun HomeScreen(
 private fun LazyStaggeredGridScope.musicList(
     uiState: MusicUiState,
     onToggleBookMark: (MusicResource) -> Unit,
-    onMusicClick: (MusicResource) -> Unit,
     onMusicPlay: (List<MusicResource>) -> Unit,
 ) {
     if (uiState is MusicUiState.Shown) {
@@ -158,7 +156,6 @@ private fun LazyStaggeredGridScope.musicList(
                     musicUiModel = music,
                     modifier = Modifier.fillMaxWidth().animateItem(),
                     onToggleBookMark = { onToggleBookMark(music.musicResource) },
-                    onMusicClick = { onMusicClick(music.musicResource) },
                     onPlayMusic = {
                         val curIdx = musicUiModels.indexOf(music)
                         onMusicPlay(musicUiModels.drop(curIdx).map { it.musicResource })
@@ -168,83 +165,6 @@ private fun LazyStaggeredGridScope.musicList(
         }
     }
 }
-
-//@Composable
-//private fun MusicItem(
-//    isBookmarked: Boolean,
-//    musicUiModel: MusicUiModel,
-//    modifier: Modifier,
-//    onToggleBookMark: () -> Unit = {},
-//    onMusicClick: () -> Unit = {}
-//) {
-//    Surface(
-//        modifier = modifier,
-//        shape = RoundedCornerShape(8.dp),
-//        color = MaterialTheme.colorScheme.surface,
-//        onClick = onMusicClick
-//    ) {
-//        Row(
-//            modifier = Modifier.padding(12.dp),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            // 앨범 아트 이미지
-//            Box(
-//                modifier = Modifier
-//                    .size(120.dp)
-//                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(6.dp)),
-//                contentAlignment = Alignment.Center
-//            ) {
-//                // 개별 이미지 로딩 스피너
-//                if (musicUiModel.isArtLoading) {
-//                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
-//                }
-//                // 앨범 아트가 있으면 표시
-//                musicUiModel.albumArt?.let { bitmap ->
-//                    Image(
-//                        bitmap = bitmap.asImageBitmap(),
-//                        contentDescription = "${musicUiModel.musicResource.originalName} 앨범 아트",
-//                        contentScale = ContentScale.Crop,
-//                        modifier = Modifier.fillMaxWidth()
-//                    )
-//                }
-//            }
-//
-//            Spacer(Modifier.width(16.dp))
-//
-//            // 파일 정보 (제목, 아티스트 등)
-//            Column(modifier = Modifier.weight(1f)) {
-//                Text(
-//                    text = musicUiModel.musicResource.originalName,
-//                    style = MaterialTheme.typography.titleMedium
-//                )
-//                Text(
-//                    text = musicUiModel.musicResource.artist ?: "Unknown Artist",
-//                    style = MaterialTheme.typography.bodyMedium,
-//                    color = MaterialTheme.colorScheme.onSurfaceVariant
-//                )
-//            }
-//
-//            FilledIconToggleButton(
-//                checked = isBookmarked,
-//                onCheckedChange = { onToggleBookMark() },
-//                colors = iconToggleButtonColors(
-//                    checkedContainerColor = MaterialTheme.colorScheme.onSecondary,
-//                ),
-//                modifier = Modifier.size(30.dp),
-//            ) {
-//                val imageResource = if (isBookmarked) {
-//                    painterResource(R.drawable.bookmark_filled_24px)
-//                } else {
-//                    painterResource(R.drawable.bookmark_24px)
-//                }
-//                Icon(
-//                    imageResource,
-//                    contentDescription = "bookmark",
-//                )
-//            }
-//        }
-//    }
-//}
 
 @Composable
 private fun TopSectionContent(

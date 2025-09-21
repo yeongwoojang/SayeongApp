@@ -158,7 +158,7 @@ fun SayeongApp(
                     sheetDragHandle = {},
                 ) { innerBottomSheetPadding ->
                     SayeongNavHost(
-                        modifier = Modifier.padding(innerBottomSheetPadding),
+                        modifier = Modifier.padding(top = innerBottomSheetPadding.calculateTopPadding(), bottom = innerScaffoldPadding.calculateBottomPadding()),
                         navController = appState.navController,
                         onMusicClick = { music ->
 //                            playerViewModel.playMusic(music)

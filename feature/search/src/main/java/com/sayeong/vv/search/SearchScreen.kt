@@ -3,6 +3,7 @@ package com.sayeong.vv.search
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -49,7 +50,7 @@ import com.sayeong.vv.ui.components.MusicItem
 @Composable
 fun SearchScreen(
     onBackClick: () -> Unit,
-    onMusicClick: (MusicResource) -> Unit,
+    onMusicPlay: (List<MusicResource>) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
@@ -80,7 +81,7 @@ fun SearchScreen(
                     contents = state.musicResources,
                     bookmarkedMusics = state.bookmarkedMusics,
                     onToggleBookMark = viewModel::toggleBookMark,
-                    onMusicClick = onMusicClick
+                    onMusicPlay = onMusicPlay,
                 )
             }
             is SearchUiState.Error -> {
@@ -203,11 +204,12 @@ private fun SearchContent(
     contents: List<MusicUiModel>,
     bookmarkedMusics: Set<MusicResource>,
     onToggleBookMark: (MusicResource) -> Unit,
-    onMusicClick: (MusicResource) -> Unit
+    onMusicPlay: (List<MusicResource>) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(24.dp),
+        contentPadding = PaddingValues(bottom = 16.dp)
     ) {
         items(
             items = contents,
@@ -218,7 +220,10 @@ private fun SearchContent(
                 musicUiModel = music,
                 modifier = Modifier,
                 onToggleBookMark = onToggleBookMark,
-                onMusicClick = { onMusicClick(music.musicResource) }
+                onPlayMusic = {
+                    val curIdx = contents.indexOf(music)
+                    onMusicPlay(contents.drop(curIdx).map { it.musicResource })
+                }
             )
         }
     }
