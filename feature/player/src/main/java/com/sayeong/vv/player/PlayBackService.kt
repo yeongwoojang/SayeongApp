@@ -15,16 +15,19 @@ class PlayBackService: MediaSessionService() {
     lateinit var player: Player
     private var mediaSession: MediaSession? = null
 
+    companion object {
+        const val OPEN_PLAYER_ACTION = "com.sayeong.vv.OPEN_PLAYER"
+        const val OPEN_PLAYER = "OPEN_PLAYER"
+    }
+
     override fun onCreate() {
         super.onCreate()
 
-        // 1. MainActivity를 열도록 Intent 생성
-        val sessionActivityIntent = packageManager?.getLaunchIntentForPackage(packageName)?.apply {
-            // "player" 화면을 열라는 추가 정보 담기
-            putExtra("LAUNCH_PLAYER", true)
+        val sessionActivityIntent = Intent(OPEN_PLAYER_ACTION).apply {
+            `package` = this@PlayBackService.packageName
+            putExtra(OPEN_PLAYER, true)
         }
 
-        // 2. PendingIntent 생성
         val sessionActivityPendingIntent = PendingIntent.getActivity(
             this,
             0,
@@ -32,8 +35,6 @@ class PlayBackService: MediaSessionService() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        Timber.i("TEST_LOG | gogogogo")
-        // 3. MediaSession 빌드 시 PendingIntent 설정
         mediaSession = MediaSession.Builder(this, player)
             .setSessionActivity(sessionActivityPendingIntent)
             .build()
@@ -46,18 +47,15 @@ class PlayBackService: MediaSessionService() {
 
 
     override fun onUpdateNotification(session: MediaSession, startInForegroundRequired: Boolean) {
-        Timber.i("TEST_LOG | onUpdateNotification() | startInForegroundRequired: $startInForegroundRequired")
         super.onUpdateNotification(session, startInForegroundRequired)
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
-        Timber.i("TEST_LOG | onTaskRemoved()")
         super.onTaskRemoved(rootIntent)
         stopSelf()
     }
 
     override fun onDestroy() {
-        Timber.i("TEST_LOG | onDestroy()")
         mediaSession?.run {
             player.release()
             release()

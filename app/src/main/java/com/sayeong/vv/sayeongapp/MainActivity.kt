@@ -1,5 +1,6 @@
 package com.sayeong.vv.sayeongapp
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -17,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.sayeong.vv.home.HomeScreen
 import com.sayeong.vv.designsystem.theme.SayeongAppTheme
+import com.sayeong.vv.player.PlayBackService
 import com.sayeong.vv.sayeongapp.ui.SayeongApp
 import com.sayeong.vv.sayeongapp.ui.rememberSayeongAppState
 import dagger.hilt.android.AndroidEntryPoint
@@ -25,15 +27,14 @@ import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private var shouldLaunchPlayer by mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-
-        var shouldLaunchPlayer by mutableStateOf(intent.getBooleanExtra("LAUNCH_PLAYER", false))
-
-        Timber.i("TEST_LOG | shouldLaunchPlayer: $shouldLaunchPlayer")
-
+        Timber.i("TEST_LOG | onCraete")
+        handleIntent(intent)
         setContent {
             SayeongAppTheme {
                 val appState = rememberSayeongAppState()
@@ -45,20 +46,14 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    com.sayeong.vv.designsystem.theme.SayeongAppTheme {
-        Greeting("Android")
+    private fun handleIntent(intent: Intent?) {
+        shouldLaunchPlayer = intent?.getBooleanExtra(PlayBackService.OPEN_PLAYER, false) ?: false
     }
 }
