@@ -61,6 +61,5 @@ class PlayBackService: MediaSessionService() {
             release()
             mediaSession = null
         }
-        super.onDestroy()
     }
 }

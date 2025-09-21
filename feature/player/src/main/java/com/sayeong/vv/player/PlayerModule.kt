@@ -38,7 +38,6 @@ object PlayerModule {
 
     @OptIn(UnstableApi::class)
     @Provides
-    @Singleton
     fun provideExoPlayer(
         @ApplicationContext context: Context,
         ren: RenderersFactory): Player {
