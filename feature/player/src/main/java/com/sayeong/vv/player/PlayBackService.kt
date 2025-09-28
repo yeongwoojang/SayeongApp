@@ -41,7 +41,6 @@ class PlayBackService: MediaSessionService() {
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
-        Timber.i("TEST_LOG | onGetSession() | controllerInfo: $controllerInfo")
         return mediaSession
     }
 

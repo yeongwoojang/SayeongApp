@@ -33,7 +33,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        Timber.i("TEST_LOG | onCraete")
         handleIntent(intent)
         setContent {
             SayeongAppTheme {
