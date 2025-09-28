@@ -138,8 +138,9 @@ fun SayeongApp(
                     }
                 }
             ) { innerScaffoldPadding ->
+                val bottomPadding = if (isPlayerLaunched) 80.dp else 0.dp
                 BottomSheetScaffold(
-                    modifier = Modifier.padding(top = innerScaffoldPadding.calculateTopPadding()),
+                    modifier = Modifier.padding(top = innerScaffoldPadding.calculateTopPadding(), bottom = bottomPadding),
                     scaffoldState = scaffoldState,
                     sheetContent = {
                         PlayerScreen(
@@ -160,12 +161,6 @@ fun SayeongApp(
                     SayeongNavHost(
                         modifier = Modifier.padding(top = innerBottomSheetPadding.calculateTopPadding(), bottom = innerScaffoldPadding.calculateBottomPadding()),
                         navController = appState.navController,
-                        onMusicClick = { music ->
-//                            playerViewModel.playMusic(music)
-                            scope.launch {
-                                scaffoldState.bottomSheetState.expand()
-                            }
-                        },
                         onMusicPlay = { musics ->
                             playerViewModel.playMusics(musics)
                             scope.launch {

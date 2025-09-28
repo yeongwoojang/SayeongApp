@@ -56,6 +56,7 @@ class PlayBackService: MediaSessionService() {
     }
 
     override fun onDestroy() {
+        super.onDestroy()
         mediaSession?.run {
             player.release()
             release()

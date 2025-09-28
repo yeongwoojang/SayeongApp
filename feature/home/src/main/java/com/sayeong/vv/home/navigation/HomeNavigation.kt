@@ -7,12 +7,10 @@ import com.sayeong.vv.model.MusicResource
 import com.sayeong.vv.ui.SayeongDestination
 
 fun NavGraphBuilder.homeScreen(
-    onMusicClick: (MusicResource) -> Unit,
     onMusicPlay: (List<MusicResource>) -> Unit
 ) {
     composable(SayeongDestination.HOME.route) {
         HomeScreen(
-            onMusicClick = onMusicClick,
             omMusicPlay = onMusicPlay
         )
 

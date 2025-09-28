@@ -57,7 +57,6 @@ import com.sayeong.vv.ui.components.MusicItem
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onMusicClick: (MusicResource) -> Unit,
     omMusicPlay: (List<MusicResource>) -> Unit
 ) {
 
