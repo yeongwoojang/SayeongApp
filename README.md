@@ -23,4 +23,11 @@
 * 오디오 배속 재생
 * videoPlayer CustomUI (고도화 예정)
 
-### 화면 구성
+### 앱 시연 영상
+
+[앱시연1.webm](https://github.com/user-attachments/assets/8b4dd8b8-0849-463a-a4e1-bacbf60a6d6c)
+
+
+[앱시연2.webm](https://github.com/user-attachments/assets/2a7a901d-61b1-4f0e-bab6-4fda3531e8d1)
+
+
