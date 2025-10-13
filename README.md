@@ -8,9 +8,9 @@
 * **backend**: Node.js
 
 ### 구현 기능
-* 오디오 재생 시 무음구간 자동 스킵
+* 오디오 연속 재생
 * 오디오 배속 재생
-* videoPlayer CustomUI (고도화 예정)
+* ExoPlayer CustomUI
 
 ### 앱 시연 영상
 
