@@ -1,18 +1,7 @@
 ## 안드로이드 앱 아키텍처 활용한 앱 구현 (Now In Android 참조)
 
 ### 프로젝트 구조
-- app
-- build-logic (android 모듈)
-- core
-  - data (android 모듈)
-  - designsystem (android 모듈) 
-  - domain (순수 kotlin 모듈)
-  - model (순수 kotlin 모듈)
-  - network (android 모듈)
-- feature
-  - home (android 모듈)
-  - player (android 모듈)
-
+<img width="450" height="350" alt="프로젝트 구조" src="https://github.com/user-attachments/assets/dfd5dbab-8199-4a6c-8636-3593f3536e29" />
 
 ### 활용 기술
 * **Android**: MVVM, Compose, Xml, Hilt, Retrofit, OkHttp3, Media3
