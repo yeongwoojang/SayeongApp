@@ -1,7 +1,8 @@
 ## 안드로이드 클린 아키텍처 활용한 앱 구현 (Now In Android 참조)
 
 ### 프로젝트 구조
-<img width="450" height="350" alt="프로젝트 구조" src="https://github.com/user-attachments/assets/dfd5dbab-8199-4a6c-8636-3593f3536e29" />
+<img width="600" height="400" alt="프로젝트 구조" src="https://github.com/user-attachments/assets/d0114903-4ba4-4101-9cd3-175c36302fa7" />
+
 
 ### 활용 기술
 * **Android**: MVVM, Compose, Xml, Hilt, Retrofit, OkHttp3, Media3
