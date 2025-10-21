@@ -33,10 +33,10 @@ android {
 }
 
 dependencies {
-    api(projects.core.domain)
-    api(projects.core.model)
-    api(projects.core.network)
-    api(projects.core.database)
+    implementation(projects.core.domain)
+    implementation(projects.core.model)
+    implementation(projects.core.network)
+    implementation(projects.core.database)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
